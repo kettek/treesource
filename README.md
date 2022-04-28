@@ -10,6 +10,7 @@ git submodule update --init --recursive
 To build the Wails-backed GUI, run:
 
 ```
+wails generate module
 wails build
 ```
 
