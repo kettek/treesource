@@ -1,10 +1,10 @@
 <script lang="ts">
   import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
-  import {ListFiles} from '../wailsjs/go/main/App.js'
-  import type {main} from '../wailsjs/go/models'
+  import {ListFiles} from '../wailsjs/go/lib/App.js'
+  import type {lib} from '../wailsjs/go/models'
 
-  let currentFiles: (main.DirEntry[]|Error) = []
+  let currentFiles: (lib.DirEntry[]|Error) = []
   let path: string
 
   $: inRoot = path === '/' || path === ''
@@ -16,7 +16,7 @@
       console.log(err)
     }
   }
-  async function navigate(to: main.DirEntry) {
+  async function navigate(to: lib.DirEntry) {
     if (!to.Info.IsDir) return
     // TODO: Send request to move to a directory, then wait for a response.
     path = path+"/" + to.Name
@@ -28,61 +28,53 @@
 </script>
 
 <main>
-  <div class="result" id="resultPath">
-    <ul class='entries'>
-      {#if !inRoot}
-        <li class='entry' on:click={up}>
-          <span class='entry__image'>
-            <img src="{folderIcon}" alt='folder'>
-          </span>
-          <span class='entry__name'> Up </span>
-        </li>
-      {/if}
-      {#if Array.isArray(currentFiles)}
-        {#each currentFiles as entry}
-          <li class='entry' on:click={()=>navigate(entry)}>
-            <span class='entry__image'>
-              {#if entry.Info.IsDir}
-                <img src="{folderIcon}" alt='folder'>
-              {:else}
-                <img src="{noneIcon}" alt='file'>
-              {/if}
-            </span>
-            <span class='entry__name'> {entry.Name} </span>
-          </li>
-        {/each}
-      {/if}
-    </ul>
-  </div>
-  <div class="input-box" id="input">
-    <input autocomplete="off" bind:value={path} class="input" id="path" type="text" on:keyup={e=>e.key==='Enter'?getFiles():null} />
-    <button class="btn" on:click={getFiles}>List Files</button>
-  </div>
+  <section class='menu'>app menu</section>
+  <section class='view'>
+    <section class='view__dirs'>
+      <div class='view__dirs__dirs'>
+        dirs
+      </div>
+      <div class='view__dirs__tags'>
+        tags
+      </div>
+    </section>
+    <section class='view__view'>
+      <div class='view__view__top'>tabs & viewmenu</div>
+      <div class='view__view__items'>files</div>
+      <div class='view__view__controls'>controls</div>
+    </section>
+    <section class='view__info'>
+      <div class='view__info__preview'>preview</div>
+      <div class='view__info__data'>metadata</div>
+    </section>
+  </section>
 </main>
 
 <style>
-  .result {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    overflow: auto;
-  }
   main {
     width: 100%;
     height: 100%;
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
     grid-template-columns: minmax(0, 1fr);
   }
-  .entries {
-    list-style: none;
+  section.menu {
   }
-  .entry {
+  section.view {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
-  .entry__image img {
-    width: 64px;
-    height: 64px;
+  section.view__dirs {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  section.view__view {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+  section.view__info {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
   }
 </style>
