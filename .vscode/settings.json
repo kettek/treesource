@@ -1,0 +1,8 @@
+{
+  "javascript.preferences.quoteStyle": "single",
+  "typescript.preferences.quoteStyle": "single",
+  "svelte.plugin.svelte.format.config.singleQuote": true,
+  "html.completion.attributeDefaultValue": "singlequotes",
+  "javascript.format.semicolons": "remove",
+  "typescript.format.semicolons": "remove"
+}
