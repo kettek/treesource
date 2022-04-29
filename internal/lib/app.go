@@ -122,6 +122,13 @@ func (a *App) LoadProjectFile(name string, force bool) error {
 	err = yaml.Unmarshal(b, &a.Project)
 	a.Project.Path = name
 
+	for _, d := range a.Project.Directories {
+		if d.SyncOnLoad {
+			// FIXME: Handle SyncEntries error condition!
+			d.SyncEntries()
+		}
+	}
+
 	return err
 }
 
