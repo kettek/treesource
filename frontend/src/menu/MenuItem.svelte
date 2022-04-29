@@ -5,7 +5,7 @@
 
   const dispatch = createEventDispatcher()
 
-  const { openPopup, openSubPopup } = getContext(POPUPS)
+  const { openPopup, closePopup, openSubPopup } = getContext(POPUPS)
 
   export let popup = ''
   export let subpopup = ''
@@ -19,6 +19,8 @@
 
     if (action) {
       actionPublisher.publish(action, args)
+      closePopup()
+      return
     }
 
     let rect = self.getBoundingClientRect()
