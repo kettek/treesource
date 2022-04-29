@@ -66,7 +66,7 @@
             <MenuItem action='file-new'>
               New Treesource File
             </MenuItem>
-            <MenuSplit></MenuSplit>
+            <MenuSplit />
             <MenuItem action='file-open'>
               Open Treesource File
             </MenuItem>
@@ -78,10 +78,22 @@
                 HOT DOG
               </MenuItem>
             </MenuList>
-            <MenuSplit></MenuSplit>
+            <MenuSplit />
             <MenuItem action='file-close' disabled>
               Close
             </MenuItem>
+          </MenuList>
+        </MenuItem>
+        <MenuItem popup='help-menu'>
+          Help
+          <MenuList popup='help-menu'>
+            <MenuItem disabled>Get Started</MenuItem>
+            <MenuSplit />
+            <MenuItem disabled>View License</MenuItem>
+            <MenuSplit />
+            <MenuItem disabled>Check For Updates</MenuItem>
+            <MenuSplit />
+            <MenuItem disabled >About</MenuItem>
           </MenuList>
         </MenuItem>
       </MenuBar>
