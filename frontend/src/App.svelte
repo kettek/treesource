@@ -2,7 +2,7 @@
   import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
   import { HasProject, ListFiles, NewProject, GetProject, CloseProjectFile, LoadProjectFile } from '../wailsjs/go/main/WApp.js'
-  import { EventsOn, EventsOff, EventsOnMultiple } from '../wailsjs/runtime/runtime'
+  import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
   import type { lib } from '../wailsjs/go/models'
   import * as Dialog from '../wailsjs/go/main/Dialog'
   import MenuBar from './menu/MenuBar.svelte'
@@ -114,6 +114,20 @@
         throw(error)
       }
     }))
+    subs.push(actionPublisher.subscribe('quit', async ({message}) => {
+      if (!message) {
+        if (project && changed) {
+          let result = await Dialog.Message({
+            Type: "warning",
+            Message: "The project has changes and is not saved. Quit anyway?",
+          })
+          if (result !== "Yes") {
+            return
+          }
+        }
+      }
+      Quit()
+    }))
     
     // Set up runtime event receival.
     EventsOnMultiple('project-load', async (data: any) => {
@@ -176,6 +190,10 @@
             <MenuSplit />
             <MenuItem action='file-close' disabled={!project}>
               Close
+            </MenuItem>
+            <MenuSplit />
+            <MenuItem action='quit'>
+              Quit
             </MenuItem>
           </MenuList>
         </MenuItem>
