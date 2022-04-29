@@ -116,9 +116,9 @@
     }))
     
     // Set up runtime event receival.
-    EventsOnMultiple('project-load', (data: any) => {
-      console.log("project load", data)
-      project = GetProject()
+    EventsOnMultiple('project-load', async (data: any) => {
+      project = await GetProject()
+      console.log("project load", project.Directories)
     }, -1)
 
     //
@@ -129,6 +129,13 @@
 
     EventsOnMultiple('project-changed', (data: boolean) => {
       changed = data
+    }, -1)
+
+    EventsOnMultiple('file-add', (data: any) => {
+      // something
+    }, -1)
+    EventsOnMultiple('file-remove', (data: any) => {
+      // something x2
     }, -1)
 
     return () => {
