@@ -1,8 +1,15 @@
 <script lang="ts">
   import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
-  import {ListFiles} from '../wailsjs/go/lib/App.js'
-  import type {lib} from '../wailsjs/go/models'
+  import { ListFiles } from '../wailsjs/go/lib/App.js'
+  import type { lib } from '../wailsjs/go/models'
+  import MenuBar from './menu/MenuBar.svelte'
+  import MenuItem from './menu/MenuItem.svelte'
+  import MenuList from './menu/MenuList.svelte'
+  import Menus from './menu/Menus.svelte'
+  import MenuSplit from './menu/MenuSplit.svelte'
+  import { actionPublisher } from './actions'
+  import { onMount } from 'svelte'
 
   let currentFiles: (lib.DirEntry[]|Error) = []
   let path: string
@@ -25,10 +32,61 @@
   async function up() {
     // TODO: Send request to move up a directory, then wait for a response.
   }
+
+  onMount(() => {
+    let subs = []
+    
+    subs.push(actionPublisher.subscribe('file-new', async ({sourceTopic}) => {
+      console.log('TODO: Create file')
+    }))
+    subs.push(actionPublisher.subscribe('file-open', async ({sourceTopic, message}) => {
+      if (message === undefined) {
+        console.log('TODO: Open file dialog')
+      } else {
+        console.log('TODO: Open file', message)
+      }
+    }))
+    subs.push(actionPublisher.subscribe('file-close', async ({sourceTopic}) => {
+      console.log('TODO: Close file')
+    }))
+
+    return () => {
+      subs.forEach(v=>actionPublisher.unsubscribe(v))
+    }
+  })
 </script>
 
 <main>
-  <section class='menu'>app menu</section>
+  <section class='menu'>
+    <Menus>
+      <MenuBar>
+        <MenuItem popup='file-menu'>
+          File
+          <MenuList popup='file-menu'>
+            <MenuItem action='file-new'>
+              New Treesource File
+            </MenuItem>
+            <MenuSplit></MenuSplit>
+            <MenuItem action='file-open'>
+              Open Treesource File
+            </MenuItem>
+            <MenuItem subpopup='file-menu-open-recent'>
+              Open Recent...
+            </MenuItem>
+            <MenuList subpopup='file-menu-open-recent'>
+              <MenuItem action='file-open' args='some/file.trsrc'>
+                HOT DOG
+              </MenuItem>
+            </MenuList>
+            <MenuSplit></MenuSplit>
+            <MenuItem action='file-close' disabled>
+              Close
+            </MenuItem>
+          </MenuList>
+        </MenuItem>
+      </MenuBar>
+    </Menus>
+  </section>
   <section class='view'>
     <section class='view__dirs'>
       <div class='view__dirs__dirs'>
