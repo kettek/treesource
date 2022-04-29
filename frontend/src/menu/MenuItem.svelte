@@ -23,7 +23,7 @@
 
     let rect = self.getBoundingClientRect()
     if (popup) {
-      openPopup(popup, 0, rect.y + rect.height)
+      openPopup(popup, rect.x, rect.y + rect.height)
     } else if (subpopup) {
       openSubPopup(subpopup, rect.x + rect.width, rect.y)
     } else {
