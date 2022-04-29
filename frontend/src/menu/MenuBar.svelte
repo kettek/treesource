@@ -9,9 +9,8 @@
   nav {
     position: relative;
     width: 100%;
-    display: grid;
-    grid-template-rows: minmax(0, 1fr);
-    justify-content: flex-start;
+    text-align: left;
     border-bottom: 1px solid teal;
+    display: flex;
   }
 </style>
