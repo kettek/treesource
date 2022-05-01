@@ -21,6 +21,10 @@ body {
 }
 
 #app {
+    width: 100vw;
     height: 100vh;
     text-align: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
 }
