@@ -139,6 +139,7 @@
     EventsOnMultiple('project-unload', (data: any) => {
       console.log("project unload", data)
       project = undefined
+      changed = false
     }, -1)
 
     EventsOnMultiple('project-changed', (data: boolean) => {
