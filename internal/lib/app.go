@@ -65,8 +65,9 @@ func (a *App) NewProject(name string, dir string, ignoreDot bool) error {
 	}
 
 	p := &Project{
-		Title: strings.TrimSuffix(path.Base(name), path.Ext(name)),
-		Path:  name,
+		Title:   strings.TrimSuffix(path.Base(name), path.Ext(name)),
+		Path:    name,
+		Emitter: *NewEmitter(),
 	}
 	if dir != "" {
 		if err := p.AddDirectory(dir, ignoreDot); err != nil {
@@ -120,6 +121,7 @@ func (a *App) LoadProjectFile(name string, force bool) error {
 	}
 
 	err = yaml.Unmarshal(b, &a.Project)
+	a.Project.Emitter = *NewEmitter()
 	a.Project.Path = name
 
 	for _, d := range a.Project.Directories {

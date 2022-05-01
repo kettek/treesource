@@ -9,6 +9,7 @@ import (
 
 // Directory represents a source directory to pull files from.
 type Directory struct {
+	Emitter
 	UUID       uuid.UUID         `json:"UUID" yaml:"UUID"`
 	Path       string            `json:"Path" yaml:"Path"`
 	Entries    []*DirectoryEntry `json:"Entries" yaml:"Entries"`
@@ -26,8 +27,12 @@ func (d *Directory) Entry(name string) *DirectoryEntry {
 	return nil
 }
 
-// SyncEntries synchronizes the directory's entries with the on-disk file structure.
+// SyncEntries synchronizes the directory's entries with the on-disk file structure. Emits: sync, synced, add, found, missing
 func (d *Directory) SyncEntries() error {
+	d.Emit("sync", &DirectorySyncEvent{
+		UUID: d.UUID,
+		Name: d.Path,
+	})
 	unmatchedEntries := make([]*DirectoryEntry, len(d.Entries))
 	copy(unmatchedEntries, d.Entries)
 	var errors []error
@@ -51,6 +56,10 @@ func (d *Directory) SyncEntries() error {
 					d.Entries = append(d.Entries, &DirectoryEntry{
 						Path: localpath,
 					})
+					d.Emit("add", &DirectoryFileAddEvent{
+						Name: d.Path,
+						File: d.Entries[len(d.Entries)-1],
+					})
 				} else {
 					for i, e := range unmatchedEntries {
 						if e.Path == localpath {
@@ -60,6 +69,10 @@ func (d *Directory) SyncEntries() error {
 							// Mark found entries as not missing if they were marked as such.
 							if e.Missing {
 								e.Missing = false
+								d.Emit("found", &DirectoryFileFoundEvent{
+									Name: d.Path,
+									File: e,
+								})
 							}
 							break
 						}
@@ -73,6 +86,10 @@ func (d *Directory) SyncEntries() error {
 			for i, e2 := range d.Entries {
 				if e.Path == e2.Path {
 					d.Entries[i].Missing = true
+					d.Emit("missing", &DirectoryFileMissingEvent{
+						Name: d.Path,
+						File: e,
+					})
 					break
 				}
 			}
@@ -81,10 +98,17 @@ func (d *Directory) SyncEntries() error {
 
 	walk("", d.Path)
 
+	var err error
 	if len(errors) > 0 {
-		return &SyncError{errors}
+		err = &SyncError{errors}
 	}
-	return nil
+
+	d.Emit("synced", &DirectorySyncedEvent{
+		UUID:  d.UUID,
+		Name:  d.Path,
+		Error: err,
+	})
+	return err
 }
 
 // DirectoryEntry represents an entry in a treesource directory.
