@@ -13,3 +13,11 @@ func (e *SyncError) Error() string {
 	}
 	return s
 }
+
+type MissingDirectoryError struct {
+	dir string
+}
+
+func (e *MissingDirectoryError) Error() string {
+	return fmt.Sprintf("directory '%s' is missing", e.dir)
+}
