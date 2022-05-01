@@ -71,6 +71,7 @@ func (w *WApp) NewProject(name string, dir string, ignoreDot bool) error {
 	if err == nil {
 		runtime.EventsEmit(w.Context(), "project-load", w.Project)
 		runtime.WindowSetTitle(w.Context(), fmt.Sprintf("%s - %s", w.Project.Title, "treesource"))
+		w.InitProject()
 	}
 	return err
 }
@@ -80,8 +81,18 @@ func (w *WApp) LoadProjectFile(name string, force bool) error {
 	if err == nil {
 		runtime.EventsEmit(w.Context(), "project-load", w.Project)
 		runtime.WindowSetTitle(w.Context(), fmt.Sprintf("%s - %s", w.Project.Title, "treesource"))
+		if w.Project.Changed() {
+			runtime.EventsEmit(w.Context(), "project-changed")
+			w.Project.Unchange()
+		}
+		w.InitProject()
 	}
 	return err
+}
+
+func (w *WApp) InitProject() error {
+
+	return nil
 }
 
 func (w *WApp) CloseProjectFile(force bool) error {
