@@ -124,14 +124,25 @@ func (a *App) LoadProjectFile(name string, force bool) error {
 	a.Project.Emitter = *NewEmitter()
 	a.Project.Path = name
 
+	return err
+}
+
+func (a *App) InitProject() error {
 	for _, d := range a.Project.Directories {
 		if d.SyncOnLoad {
 			// FIXME: Handle SyncEntries error condition!
 			d.SyncEntries()
 		}
+		a.Project.Emit(EventDirectory, DirectoryEvent{
+			UUID: d.UUID,
+			Name: d.Path,
+		})
 	}
-
-	return err
+	// Also send the actual directory contents.
+	for _, d := range a.Project.Directories {
+		d.EmitAllEntries()
+	}
+	return nil
 }
 
 // CloseProjectFile closes the current project if one exists. If the project is unsaved and force is not true, then an UnsavedError is returned. If no project is open, then NoProjectError is returned.

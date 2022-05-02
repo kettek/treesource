@@ -27,6 +27,15 @@ func (d *Directory) Entry(name string) *DirectoryEntry {
 	return nil
 }
 
+func (d *Directory) EmitAllEntries() {
+	for _, e := range d.Entries {
+		d.Emit("entry", &DirectoryEntryEvent{
+			Name:  e.Path,
+			Entry: e,
+		})
+	}
+}
+
 // SyncEntries synchronizes the directory's entries with the on-disk file structure. Emits: sync, synced, add, found, missing
 func (d *Directory) SyncEntries() error {
 	d.Emit("sync", &DirectorySyncEvent{
@@ -56,9 +65,9 @@ func (d *Directory) SyncEntries() error {
 					d.Entries = append(d.Entries, &DirectoryEntry{
 						Path: localpath,
 					})
-					d.Emit("add", &DirectoryFileAddEvent{
-						Name: d.Path,
-						File: d.Entries[len(d.Entries)-1],
+					d.Emit("add", &DirectoryEntryAddEvent{
+						Name:  d.Path,
+						Entry: d.Entries[len(d.Entries)-1],
 					})
 				} else {
 					for i, e := range unmatchedEntries {
@@ -69,9 +78,9 @@ func (d *Directory) SyncEntries() error {
 							// Mark found entries as not missing if they were marked as such.
 							if e.Missing {
 								e.Missing = false
-								d.Emit("found", &DirectoryFileFoundEvent{
-									Name: d.Path,
-									File: e,
+								d.Emit("found", &DirectoryEntryFoundEvent{
+									Name:  d.Path,
+									Entry: e,
 								})
 							}
 							break
@@ -86,9 +95,9 @@ func (d *Directory) SyncEntries() error {
 			for i, e2 := range d.Entries {
 				if e.Path == e2.Path {
 					d.Entries[i].Missing = true
-					d.Emit("missing", &DirectoryFileMissingEvent{
-						Name: d.Path,
-						File: e,
+					d.Emit("missing", &DirectoryEntryMissingEvent{
+						Name:  d.Path,
+						Entry: e,
 					})
 					break
 				}

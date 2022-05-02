@@ -52,18 +52,24 @@ func (p *Project) AddDirectory(name string, ignoreDot bool) error {
 		Emitter:    *NewEmitter(),
 	}
 
+	d.On("sync", p.SyncDirectoryCallback)
+	d.On("synced", p.SyncedDirectoryCallback)
+	d.On("entry", p.EntryCallback)
+	d.On("add", p.EntryAddCallback)
+	d.On("found", p.EntryFoundCallback)
+	d.On("missing", p.EntryMissingCallback)
+
 	err := d.SyncEntries()
 	if err != nil {
 		return err
 	}
 
-	d.On("sync", p.SyncDirectoryCallback)
-	d.On("synced", p.SyncedDirectoryCallback)
-	d.On("add", p.FileAddCallback)
-	d.On("found", p.FileFoundCallback)
-	d.On("missing", p.FileMissingCallback)
-
 	p.Directories = append(p.Directories, d)
+
+	p.Emit(EventDirectoryAdd, DirectoryAddEvent{
+		UUID: d.UUID,
+		Name: d.Path,
+	})
 
 	p.changed = true
 
@@ -86,21 +92,31 @@ func (p *Project) SyncDirectory(name string) error {
 //
 
 func (p *Project) SyncDirectoryCallback(e Event) {
-	p.Emit("directory-sync", e)
+	fmt.Println(EventDirectorySync, e)
+	p.Emit(EventDirectorySync, e)
 }
 
 func (p *Project) SyncedDirectoryCallback(e Event) {
-	p.Emit("directory-synced", e)
+	fmt.Println(EventDirectorySynced, e)
+	p.Emit(EventDirectorySynced, e)
 }
 
-func (p *Project) FileAddCallback(e Event) {
-	p.Emit("directory-file-add", e)
+func (p *Project) EntryCallback(e Event) {
+	fmt.Println(EventDirectoryEntry, e)
+	p.Emit(EventDirectoryEntry, e)
 }
 
-func (p *Project) FileMissingCallback(e Event) {
-	p.Emit("directory-file-missing", e)
+func (p *Project) EntryAddCallback(e Event) {
+	fmt.Println(EventDirectoryEntryAdd, e)
+	p.Emit(EventDirectoryEntryAdd, e)
 }
 
-func (p *Project) FileFoundCallback(e Event) {
-	p.Emit("directory-file-found", e)
+func (p *Project) EntryMissingCallback(e Event) {
+	fmt.Println(EventDirectoryEntryMissing, e)
+	p.Emit(EventDirectoryEntryMissing, e)
+}
+
+func (p *Project) EntryFoundCallback(e Event) {
+	fmt.Println(EventDirectoryEntryFound, e)
+	p.Emit(EventDirectoryEntryFound, e)
 }

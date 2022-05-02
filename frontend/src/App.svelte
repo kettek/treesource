@@ -3,18 +3,21 @@
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
   import { HasProject, ListFiles, NewProject, GetProject, CloseProjectFile, LoadProjectFile } from '../wailsjs/go/main/WApp.js'
   import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
-  import type { lib } from '../wailsjs/go/models'
+  import { lib } from '../wailsjs/go/models'
   import * as Dialog from '../wailsjs/go/main/Dialog'
   import SplitPane from './components/SplitPane.svelte'
   import { actionPublisher } from './actions'
   import { onMount } from 'svelte'
   import Menu from './sections/Menu.svelte'
+  import Directories from './sections/Directories.svelte'
 
   let currentFiles: (lib.DirEntry[]|Error) = []
   let path: string
 
   let project: lib.Project
   let changed: boolean
+
+  let directories: lib.Directory[] = []
 
   $: title = project ? project.Title : ''
 
@@ -128,6 +131,7 @@
     
     // Set up runtime event receival.
     EventsOnMultiple('project-load', async (data: any) => {
+      directories = []
       project = await GetProject()
       console.log("project load", project.Directories)
     }, -1)
@@ -137,17 +141,50 @@
       console.log("project unload", data)
       project = undefined
       changed = false
+      directories = []
     }, -1)
 
     EventsOnMultiple('project-changed', (data: boolean) => {
       changed = data
     }, -1)
 
-    EventsOnMultiple('file-add', (data: any) => {
-      // something
+    EventsOnMultiple('directories', (data: any) => {
+      console.log('directories', data)
     }, -1)
-    EventsOnMultiple('file-remove', (data: any) => {
-      // something x2
+    EventsOnMultiple('directory', (data: any) => {
+      data.Path = data.Name // FIXME
+      directories = [...directories, new lib.Directory(data)]
+      if (!directories[directories.length-1].Entries) {
+        directories[directories.length-1].Entries = []
+      }
+    }, -1)
+    EventsOnMultiple('directory-sync', (data: any) => {
+      console.log('directory-sync', data)
+    }, -1)
+    EventsOnMultiple('directory-synced', (data: any) => {
+      console.log('directory-synced', data)
+    }, -1)
+    EventsOnMultiple('directory-entry', (data: any) => {
+      let d = directories.find(v=>v.UUID===data.UUID)
+      if (!d) return
+      let e = new lib.DirectoryEntry(data.Entry)
+      if (!e.Tags) {
+        e.Tags = []
+      }
+      d.Entries.push(e)
+      directories = [...directories]
+    }, -1)
+    EventsOnMultiple('directory-entry-add', (data: any) => {
+      console.log('entry-add', data)
+    }, -1)
+    EventsOnMultiple('directory-entry-remove', (data: any) => {
+      console.log('entry-remove', data)
+    }, -1)
+    EventsOnMultiple('directory-entry-missing', (data: any) => {
+      console.log('entry-missing', data)
+    }, -1)
+    EventsOnMultiple('directory-entry-found', (data: any) => {
+      console.log('entry-found', data)
     }, -1)
 
     return () => {
@@ -167,7 +204,7 @@
           <section slot=a class='view__dirs'>
             <SplitPane type="vertical" pos=50>
               <div slot=a class='view__dirs__dirs'>
-                dirs
+                <Directories bind:directories={directories}></Directories>
               </div>
               <div slot=b class='view__dirs__tags'>
                 tags

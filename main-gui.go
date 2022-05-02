@@ -91,6 +91,29 @@ func (w *WApp) LoadProjectFile(name string, force bool) error {
 }
 
 func (w *WApp) InitProject() error {
+	w.Project.On("directory", func(e lib.Event) {
+		runtime.EventsEmit(w.Context(), lib.EventDirectory, e)
+	})
+	w.Project.On("directory-sync", func(e lib.Event) {
+		runtime.EventsEmit(w.Context(), lib.EventDirectorySync, e)
+	})
+	w.Project.On("directory-synced", func(e lib.Event) {
+		runtime.EventsEmit(w.Context(), lib.EventDirectorySynced, e)
+	})
+	w.Project.On("directory-entry", func(e lib.Event) {
+		runtime.EventsEmit(w.Context(), lib.EventDirectoryEntry, e)
+	})
+	w.Project.On("directory-entry-add", func(e lib.Event) {
+		runtime.EventsEmit(w.Context(), lib.EventDirectoryEntryAdd, e)
+	})
+	w.Project.On("directory-entry-missing", func(e lib.Event) {
+		runtime.EventsEmit(w.Context(), lib.EventDirectoryEntryMissing, e)
+	})
+	w.Project.On("directory-entry-found", func(e lib.Event) {
+		runtime.EventsEmit(w.Context(), lib.EventDirectoryEntryFound, e)
+	})
+
+	w.App.InitProject()
 
 	return nil
 }
