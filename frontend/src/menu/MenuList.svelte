@@ -26,5 +26,6 @@
     grid-template-columns: minmax(0, 1fr);
     box-shadow: 4px 4px 0px 1px var(--neutral-light);
     background: var(--neutral);
+    z-index: 1000;
   }
 </style>
