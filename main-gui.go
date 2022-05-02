@@ -66,6 +66,25 @@ type WApp struct {
 	lib.App
 }
 
+func (w *WApp) Ready() {
+	if w.Project == nil {
+		return
+	}
+	runtime.EventsEmit(w.Context(), "project-load", w.Project)
+	runtime.WindowSetTitle(w.Context(), fmt.Sprintf("%s - %s", w.Project.Title, "treesource"))
+	// Also send the actual directory contents.
+
+	for _, d := range w.Project.Directories {
+		w.Project.Emit(lib.EventDirectory, lib.DirectoryEvent{
+			UUID: d.UUID,
+			Name: d.Path,
+		})
+	}
+	for _, d := range w.Project.Directories {
+		d.EmitAllEntries()
+	}
+}
+
 func (w *WApp) NewProject(name string, dir string, ignoreDot bool) error {
 	err := w.App.NewProject(name, dir, ignoreDot)
 	if err == nil {
@@ -93,6 +112,12 @@ func (w *WApp) LoadProjectFile(name string, force bool) error {
 func (w *WApp) InitProject() error {
 	w.Project.On("directory", func(e lib.Event) {
 		runtime.EventsEmit(w.Context(), lib.EventDirectory, e)
+	})
+	w.Project.On("directory-add", func(e lib.Event) {
+		runtime.EventsEmit(w.Context(), lib.EventDirectoryAdd, e)
+	})
+	w.Project.On("directory-remove", func(e lib.Event) {
+		runtime.EventsEmit(w.Context(), lib.EventDirectoryRemove, e)
 	})
 	w.Project.On("directory-sync", func(e lib.Event) {
 		runtime.EventsEmit(w.Context(), lib.EventDirectorySync, e)
@@ -125,6 +150,10 @@ func (w *WApp) CloseProjectFile(force bool) error {
 		runtime.WindowSetTitle(w.Context(), fmt.Sprintf("%s", "treesource"))
 	}
 	return err
+}
+
+func (w *WApp) AddProjectDirectory(dir string, ignoreDot bool) error {
+	return w.App.AddProjectDirectory(dir, ignoreDot)
 }
 
 func (w *WApp) GetProject() *lib.Project {

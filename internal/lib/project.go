@@ -70,10 +70,28 @@ func (p *Project) AddDirectory(name string, ignoreDot bool) error {
 		UUID: d.UUID,
 		Name: d.Path,
 	})
+	p.Emit(EventDirectory, DirectoryEvent{
+		UUID: d.UUID,
+		Name: d.Path,
+	})
 
 	p.changed = true
 
 	return nil
+}
+
+func (p *Project) RemoveDirectoryByUUID(UUID uuid.UUID) error {
+	for i, d := range p.Directories {
+		if UUID.String() == d.UUID.String() {
+			p.Directories = append(p.Directories[:i], p.Directories[i+1:]...)
+			p.Emit(EventDirectoryRemove, DirectoryRemoveEvent{
+				UUID: d.UUID,
+				Name: d.Path,
+			})
+			return nil
+		}
+	}
+	return &MissingDirectoryError{}
 }
 
 func (p *Project) SyncDirectory(name string) error {

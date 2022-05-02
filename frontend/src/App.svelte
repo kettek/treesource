@@ -1,7 +1,7 @@
 <script lang="ts">
   import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
-  import { HasProject, ListFiles, NewProject, GetProject, CloseProjectFile, LoadProjectFile } from '../wailsjs/go/main/WApp.js'
+  import { HasProject, ListFiles, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory } from '../wailsjs/go/main/WApp.js'
   import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
   import { lib } from '../wailsjs/go/models'
   import * as Dialog from '../wailsjs/go/main/Dialog'
@@ -128,6 +128,39 @@
       }
       Quit()
     }))
+    // Directory-related actions.
+    subs.push(actionPublisher.subscribe('directory-add', async({message}) => {
+      let dir = ''
+      let ignoreDot = true
+      console.log('directory-add', message)
+      let result = await Dialog.OpenDirectory({
+        Title: "Choose Folder to add",
+        CanCreateDirectories: true,
+      })
+      if (result instanceof Error) {
+        throw result
+      }
+      if (result === '') {
+        // Canceled
+        return
+      }
+      dir = result
+      result = await Dialog.Message({
+        Type: "question",
+        Title: "File Parsing",
+        Message: "Ignore '.' prefixed files and folders?",
+      })
+      if (result !== "Yes") {
+        ignoreDot = false
+      }
+
+      console.log('calling add with', dir, ignoreDot)
+
+      AddProjectDirectory(dir, ignoreDot)
+    }))
+    subs.push(actionPublisher.subscribe('directory-remove', async({message}) => {
+      RemoveProjectDirectory(message)
+    }))
     
     // Set up runtime event receival.
     EventsOnMultiple('project-load', async (data: any) => {
@@ -152,11 +185,25 @@
       console.log('directories', data)
     }, -1)
     EventsOnMultiple('directory', (data: any) => {
-      data.Path = data.Name // FIXME
-      directories = [...directories, new lib.Directory(data)]
-      if (!directories[directories.length-1].Entries) {
-        directories[directories.length-1].Entries = []
+      if (!directories.find(v=>v.UUID===data.UUID)) {
+        data.Path = data.Name // FIXME
+        directories = [...directories, new lib.Directory(data)]
+        if (!directories[directories.length-1].Entries) {
+          directories[directories.length-1].Entries = []
+        }
       }
+    }, -1)
+    EventsOnMultiple('directory-add', (data: any) => {
+      if (!directories.find(v=>v.UUID===data.UUID)) {
+        data.Path = data.Name // FIXME
+        directories = [...directories, new lib.Directory(data)]
+        if (!directories[directories.length-1].Entries) {
+          directories[directories.length-1].Entries = []
+        }
+      }
+    }, -1)
+    EventsOnMultiple('directory-remove', (data: any) => {
+      directories = directories.filter(v=>data.UUID!==v.UUID)
     }, -1)
     EventsOnMultiple('directory-sync', (data: any) => {
       console.log('directory-sync', data)
@@ -203,9 +250,7 @@
         <SplitPane type="horizontal" pos=20>
           <section slot=a class='view__dirs'>
             <SplitPane type="vertical" pos=50>
-              <div slot=a class='view__dirs__dirs'>
-                <Directories bind:directories={directories}></Directories>
-              </div>
+              <Directories slot=a disabled={!project} bind:directories={directories}></Directories>
               <div slot=b class='view__dirs__tags'>
                 tags
               </div>

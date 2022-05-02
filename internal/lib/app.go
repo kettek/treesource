@@ -86,6 +86,27 @@ func (a *App) NewProject(name string, dir string, ignoreDot bool) error {
 	return nil
 }
 
+// AddProjectDirectory adds the given directory to the project.
+func (a *App) AddProjectDirectory(dir string, ignoreDot bool) error {
+	if a.Project == nil {
+		return &NoProjectError{}
+	}
+	if err := a.Project.AddDirectory(dir, ignoreDot); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *App) RemoveProjectDirectory(uuid uuid.UUID) error {
+	if a.Project == nil {
+		return &NoProjectError{}
+	}
+	if err := a.Project.RemoveDirectoryByUUID(uuid); err != nil {
+		return err
+	}
+	return nil
+}
+
 // SaveProject saves the current project.
 func (a *App) SaveProject(force bool) error {
 	if a.Project == nil {
