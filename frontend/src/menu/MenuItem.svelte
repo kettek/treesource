@@ -46,6 +46,7 @@
     background: none;
     color: var(--neutral-text);
     text-align: left;
+    min-height: 2em;
   }
   button.disabled {
     pointer-events: none;
