@@ -28,3 +28,32 @@ body {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
 }
+
+:root {
+    --primary-h: 152;
+    --primary-s: 50%;
+    --primary-l: 25%;
+    --secondary-h: 208;
+    --secondary-s: 100%;
+    --secondary-l: 25%;
+    --neutral-h: 0;
+    --neutral-s: 0%;
+    --neutral-l: 27%;
+    /**/
+    --lighten: 25%;
+    --darken: 15%;
+    --text: 90%;
+    /**/
+    --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
+    --primary-light: hsl(var(--primary-h), var(--primary-s), calc(var(--lighten) + var(--primary-l)));
+    --primary-dark: hsl(var(--primary-h), var(--primary-s), calc(var(--primary-l) - var(--darken)));
+    --primary-text: hsl(var(--primary-h), var(--primary-s), var(--text));
+    --secondary: hsl(var(--secondary-h), var(--secondary-s), var(--secondary-l));
+    --secondary-light: hsl(var(--secondary-h), var(--secondary-s), calc(var(--lighten) + var(--secondary-l)));
+    --secondary-dark: hsl(var(--secondary-h), var(--secondary-s), calc(var(--secondary-l) - var(--darken)));
+    --secondary-text: hsl(var(--secondary-h), var(--secondary-s), var(--text));
+    --neutral: hsl(var(--neutral-h), var(--neutral-s), var(--neutral-l));
+    --neutral-light: hsl(var(--neutral-h), var(--neutral-s), calc(var(--lighten) + var(--neutral-l)));
+    --neutral-dark: hsl(var(--neutral-h), var(--neutral-s), calc(var(--neutral-l) - var(--darken)));
+    --neutral-text: hsl(var(--neutral-h), var(--neutral-s), var(--text));
+}
