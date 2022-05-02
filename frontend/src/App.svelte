@@ -5,13 +5,10 @@
   import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
   import type { lib } from '../wailsjs/go/models'
   import * as Dialog from '../wailsjs/go/main/Dialog'
-  import MenuBar from './menu/MenuBar.svelte'
-  import MenuItem from './menu/MenuItem.svelte'
-  import MenuList from './menu/MenuList.svelte'
-  import Menus from './menu/Menus.svelte'
-  import MenuSplit from './menu/MenuSplit.svelte'
+  import SplitPane from './components/SplitPane.svelte'
   import { actionPublisher } from './actions'
   import { onMount } from 'svelte'
+  import Menu from './sections/Menu.svelte'
 
   let currentFiles: (lib.DirEntry[]|Error) = []
   let path: string
@@ -161,76 +158,36 @@
 
 <main>
   <section class='menu'>
-    <Menus>
-      <MenuBar>
-        <MenuItem popup='file-menu'>
-          File
-          <MenuList popup='file-menu'>
-            <MenuItem action='file-new'>
-              New Treesource Project
-            </MenuItem>
-            <MenuItem action='file-new' args='withDir'>
-              Open Folder as New Project
-            </MenuItem>
-            <MenuSplit />
-            <MenuItem action='file-open'>
-              Open Treesource Project
-            </MenuItem>
-            <MenuItem subpopup='file-menu-open-recent'>
-              Open Recent Project...
-            </MenuItem>
-            <MenuList subpopup='file-menu-open-recent'>
-              <MenuItem action='file-open' args='some/file.trsrc'>
-                HOT DOG
-              </MenuItem>
-            </MenuList>
-            <MenuSplit />
-            <MenuItem action='file-save' disabled={!project || !changed}>
-              Save
-            </MenuItem>
-            <MenuSplit />
-            <MenuItem action='file-close' disabled={!project}>
-              Close
-            </MenuItem>
-            <MenuSplit />
-            <MenuItem action='quit'>
-              Quit
-            </MenuItem>
-          </MenuList>
-        </MenuItem>
-        <MenuItem popup='help-menu'>
-          Help
-          <MenuList popup='help-menu'>
-            <MenuItem disabled>Get Started</MenuItem>
-            <MenuSplit />
-            <MenuItem disabled>View License</MenuItem>
-            <MenuSplit />
-            <MenuItem disabled>Check For Updates</MenuItem>
-            <MenuSplit />
-            <MenuItem disabled >About</MenuItem>
-          </MenuList>
-        </MenuItem>
-      </MenuBar>
-    </Menus>
+    <Menu project={project} changed={changed}></Menu>
   </section>
   <section class='view'>
-    <section class='view__dirs'>
-      <div class='view__dirs__dirs'>
-        dirs
-      </div>
-      <div class='view__dirs__tags'>
-        tags
-      </div>
-    </section>
-    <section class='view__view'>
-      <div class='view__view__top'>tabs & viewmenu</div>
-      <div class='view__view__items'>files</div>
-      <div class='view__view__controls'>controls</div>
-    </section>
-    <section class='view__info'>
-      <div class='view__info__preview'>preview</div>
-      <div class='view__info__data'>metadata</div>
-    </section>
+    <SplitPane type="horizontal" pos=80>
+      <section slot=a>
+        <SplitPane type="horizontal" pos=20>
+          <section slot=a class='view__dirs'>
+            <SplitPane type="vertical" pos=50>
+              <div slot=a class='view__dirs__dirs'>
+                dirs
+              </div>
+              <div slot=b class='view__dirs__tags'>
+                tags
+              </div>
+            </SplitPane>
+          </section>
+          <section slot=b class='view__view'>
+            <div class='view__view__top'>tabs & viewmenu</div>
+            <div class='view__view__items'>files</div>
+            <div class='view__view__controls'>controls</div>
+          </section>
+        </SplitPane>
+      </section>
+      <section slot=b class='view__info'>
+        <SplitPane type="vertical" pos=40>
+          <div slot=a class='view__info__preview'>preview</div>
+          <div slot=b class='view__info__data'>metadata</div>
+        </SplitPane>
+      </section>
+    </SplitPane>
   </section>
 </main>
 
@@ -241,24 +198,35 @@
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     grid-template-columns: minmax(0, 1fr);
+    background: var(--neutral-dark);
+    color: var(--primary-text);
   }
   section.menu {
+    background: var(--neutral);
   }
   section.view {
     display: grid;
     grid-template-rows: minmax(0, 1fr);
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
   }
   section.view__dirs {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  div.view__dirs__dirs {
+    border: 1px solid black;
+  }
+  div.view__dirs__tags {
+    border: 1px solid black;
   }
   section.view__view {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
+    background: var(--secondary-dark);
   }
   section.view__info {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
+    border: 1px solid yellow;
   }
 </style>

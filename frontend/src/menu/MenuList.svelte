@@ -24,6 +24,7 @@
     position: fixed;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    box-shadow: 3px 3px 0px 1px teal;
+    box-shadow: 4px 4px 0px 1px var(--neutral-light);
+    background: var(--neutral);
   }
 </style>

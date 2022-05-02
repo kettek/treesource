@@ -43,8 +43,8 @@
     position: relative;
     margin: 0;
     border: 0;
-    border-right: 1px solid teal;
-    background: #666;
+    background: none;
+    color: var(--neutral-text);
     text-align: left;
   }
   button.disabled {

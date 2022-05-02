@@ -12,5 +12,6 @@
     text-align: left;
     border-bottom: 1px solid teal;
     display: flex;
+    z-index: 1000;
   }
 </style>
