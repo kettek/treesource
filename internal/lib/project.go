@@ -135,13 +135,11 @@ func (p *Project) SyncedDirectoryCallback(e Event) {
 }
 
 func (p *Project) EntryCallback(e Event) {
-	fmt.Println(EventDirectoryEntry, e)
 	p.Emit(EventDirectoryEntry, e)
 }
 
 func (p *Project) EntryAddCallback(e Event) {
 	p.Changed()
-	fmt.Println(EventDirectoryEntryAdd, e)
 	p.Emit(EventDirectoryEntryAdd, e)
 }
 
