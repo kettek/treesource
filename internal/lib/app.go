@@ -77,6 +77,9 @@ func (a *App) NewProject(name string, dir string, ignoreDot bool) error {
 		}
 	}
 
+	// Reset the history so the user cannot undo the initial directory.
+	p.history.Reset()
+
 	a.Project = p
 
 	// And save it.
@@ -99,6 +102,7 @@ func (a *App) AddProjectDirectory(dir string, ignoreDot bool) error {
 	return nil
 }
 
+// RemoveProjectDirectory removes a directory by its UUID.
 func (a *App) RemoveProjectDirectory(uuid uuid.UUID) error {
 	if a.Project == nil {
 		return &NoProjectError{}
