@@ -4,6 +4,11 @@ import "github.com/google/uuid"
 
 type Event interface{}
 
+const EventProjectChange string = "project-change"
+
+type ProjectChangeEvent struct {
+}
+
 const EventDirectories string = "directories"
 
 type DirectoriesEvent struct {

@@ -8,6 +8,8 @@
 
   export let project: lib.Project
   export let changed: boolean
+  export let undoable: boolean
+  export let redoable: boolean
 </script>
 
 <Menus>
@@ -59,5 +61,7 @@
         <MenuItem disabled >About</MenuItem>
       </MenuList>
     </MenuItem>
+    <MenuItem action='undo' disabled={!undoable}>Undo</MenuItem>
+    <MenuItem action='redo' disabled={!redoable}>Redo</MenuItem>
   </MenuBar>
 </Menus>

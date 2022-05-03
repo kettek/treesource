@@ -17,6 +17,22 @@ type Directory struct {
 	SyncOnLoad bool              `json:"SyncOnLoad" yaml:"SyncOnLoad"`
 }
 
+func (d *Directory) Clone() *Directory {
+	d2 := &Directory{}
+	d2.UUID = d.UUID
+	d2.Path = d.Path
+	d2.IgnoreDot = d.IgnoreDot
+	d2.SyncOnLoad = d.SyncOnLoad
+	d2.Emitter = *NewEmitter()
+
+	for _, e := range d.Entries {
+		e2 := e.Clone()
+		d2.Entries = append(d2.Entries, &e2)
+	}
+
+	return d2
+}
+
 // Entry retrieves an entry matching the given name.
 func (d *Directory) Entry(name string) *DirectoryEntry {
 	for _, e := range d.Entries {
@@ -125,4 +141,11 @@ type DirectoryEntry struct {
 	Tags []string `json:"Tags,omitempty" yaml:"Tags,omitempty"`
 	// Missing represents if the entry is referring to a file that no longer exists.
 	Missing bool `json:"Missing,omitempty" yaml:"Missing,omitempty"`
+}
+
+func (e *DirectoryEntry) Clone() (e2 DirectoryEntry) {
+	e2.Path = e.Path
+	copy(e2.Tags, e.Tags)
+	e2.Missing = e.Missing
+	return
 }

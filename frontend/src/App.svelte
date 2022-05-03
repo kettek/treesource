@@ -1,7 +1,7 @@
 <script lang="ts">
   import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
-  import { HasProject, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory, Ready } from '../wailsjs/go/main/WApp.js'
+  import { HasProject, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory, Ready, Undoable, Redoable, Undo, Redo } from '../wailsjs/go/main/WApp.js'
   import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
   import { lib } from '../wailsjs/go/models'
   import * as Dialog from '../wailsjs/go/main/Dialog'
@@ -15,6 +15,8 @@
 
   let project: lib.Project
   let changed: boolean
+  let undoable: boolean = false
+  let redoable: boolean = false
 
   let directories: lib.Directory[] = []
 
@@ -22,6 +24,14 @@
 
   onMount(() => {
     let subs = []
+
+    subs.push(actionPublisher.subscribe('undo', async ({sourceTopic, message}) => {
+      Undo()
+    }))
+    subs.push(actionPublisher.subscribe('redo', async ({sourceTopic, message}) => {
+      Redo()
+    }))
+
     
     subs.push(actionPublisher.subscribe('file-new', async ({sourceTopic, message}) => {
       if (await HasProject()) return
@@ -141,20 +151,28 @@
     subs.push(actionPublisher.subscribe('directory-remove', async({message}) => {
       RemoveProjectDirectory(message)
     }))
+
+    async function refresh() {
+      undoable = await Undoable()
+      redoable = await Redoable()
+      console.log('refresh', undoable, redoable)
+    }
     
     // Set up runtime event receival.
     EventsOnMultiple('project-load', async (data: any) => {
       directories = []
       project = await GetProject()
       console.log("project load", project.Directories)
+      await refresh()
     }, -1)
 
     //
-    EventsOnMultiple('project-unload', (data: any) => {
+    EventsOnMultiple('project-unload', async (data: any) => {
       console.log("project unload", data)
       project = undefined
       changed = false
       directories = []
+      await refresh()
     }, -1)
 
     EventsOnMultiple('project-changed', (data: boolean) => {
@@ -164,30 +182,35 @@
     EventsOnMultiple('directories', (data: any) => {
       console.log('directories', data)
     }, -1)
-    EventsOnMultiple('directory', (data: any) => {
+    EventsOnMultiple('directory', async (data: any) => {
       if (!directories.find(v=>v.UUID===data.UUID)) {
         directories = [...directories, new lib.Directory(data)]
         if (!directories[directories.length-1].Entries) {
           directories[directories.length-1].Entries = []
         }
       }
+      await refresh()
     }, -1)
-    EventsOnMultiple('directory-add', (data: any) => {
+    EventsOnMultiple('directory-add', async (data: any) => {
       if (!directories.find(v=>v.UUID===data.UUID)) {
         directories = [...directories, new lib.Directory(data)]
         if (!directories[directories.length-1].Entries) {
           directories[directories.length-1].Entries = []
         }
       }
+      await refresh()
     }, -1)
-    EventsOnMultiple('directory-remove', (data: any) => {
+    EventsOnMultiple('directory-remove', async (data: any) => {
       directories = directories.filter(v=>data.UUID!==v.UUID)
+      await refresh()
     }, -1)
-    EventsOnMultiple('directory-sync', (data: any) => {
+    EventsOnMultiple('directory-sync', async (data: any) => {
       console.log('directory-sync', data)
+      await refresh()
     }, -1)
-    EventsOnMultiple('directory-synced', (data: any) => {
+    EventsOnMultiple('directory-synced', async (data: any) => {
       console.log('directory-synced', data)
+      await refresh()
     }, -1)
     EventsOnMultiple('directory-entry', (data: any) => {
       let d = directories.find(v=>v.UUID===data.UUID)
@@ -202,8 +225,8 @@
       d.Entries.push(e)
       directories = [...directories]
     }, -1)
-    EventsOnMultiple('directory-entry-add', (data: any) => {
-      let d = directories.find(v=>v.UUID===data.UUID)
+    EventsOnMultiple('directory-entry-add', async (data: any) => {
+      /*let d = directories.find(v=>v.UUID===data.UUID)
       if (!d) return
       let e = new lib.DirectoryEntry(data.Entry)
       if (!e.Tags) {
@@ -214,15 +237,19 @@
       }
       d.Entries.push(e)
       directories = [...directories]
+      await refresh()*/
     }, -1)
-    EventsOnMultiple('directory-entry-remove', (data: any) => {
+    EventsOnMultiple('directory-entry-remove', async (data: any) => {
       console.log('entry-remove', data)
+      await refresh()
     }, -1)
-    EventsOnMultiple('directory-entry-missing', (data: any) => {
+    EventsOnMultiple('directory-entry-missing', async (data: any) => {
       console.log('entry-missing', data)
+      await refresh()
     }, -1)
-    EventsOnMultiple('directory-entry-found', (data: any) => {
+    EventsOnMultiple('directory-entry-found', async (data: any) => {
       console.log('entry-found', data)
+      await refresh()
     }, -1)
 
     Ready()
@@ -235,7 +262,7 @@
 
 <main>
   <section class='menu'>
-    <Menu project={project} changed={changed}></Menu>
+    <Menu project={project} changed={changed} undoable={undoable} redoable={redoable}></Menu>
   </section>
   <section class='view'>
     <SplitPane type="horizontal" pos=80>

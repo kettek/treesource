@@ -110,6 +110,9 @@ func (w *WApp) LoadProjectFile(name string, force bool) error {
 }
 
 func (w *WApp) InitProject() error {
+	w.Project.On("project-change", func(e lib.Event) {
+		runtime.EventsEmit(w.Context(), lib.EventProjectChange, e)
+	})
 	w.Project.On("directory", func(e lib.Event) {
 		runtime.EventsEmit(w.Context(), lib.EventDirectory, e)
 	})

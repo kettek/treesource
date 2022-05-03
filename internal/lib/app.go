@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"treesource/internal/do"
 
 	"github.com/google/uuid"
 	"gopkg.in/yaml.v3"
@@ -66,6 +67,9 @@ func (a *App) NewProject(name string, dir string, ignoreDot bool) error {
 		Title:   strings.TrimSuffix(path.Base(name), path.Ext(name)),
 		Path:    name,
 		Emitter: *NewEmitter(),
+	}
+	p.history = do.History[*Project]{
+		Target: p,
 	}
 	if dir != "" {
 		if err := p.AddDirectory(dir, ignoreDot); err != nil {
@@ -142,6 +146,9 @@ func (a *App) LoadProjectFile(name string, force bool) error {
 	err = yaml.Unmarshal(b, &a.Project)
 	a.Project.Emitter = *NewEmitter()
 	a.Project.Path = name
+	a.Project.history = do.History[*Project]{
+		Target: a.Project,
+	}
 
 	return err
 }
@@ -159,6 +166,34 @@ func (a *App) InitProject() error {
 		d.EmitAllEntries()
 	}
 	return nil
+}
+
+func (a *App) Undo() {
+	if a.Project == nil {
+		return
+	}
+	a.Project.history.Undo()
+}
+
+func (a *App) Redo() {
+	if a.Project == nil {
+		return
+	}
+	a.Project.history.Redo()
+}
+
+func (a *App) Undoable() bool {
+	if a.Project == nil {
+		return false
+	}
+	return a.Project.history.Undoable()
+}
+
+func (a *App) Redoable() bool {
+	if a.Project == nil {
+		return false
+	}
+	return a.Project.history.Redoable()
 }
 
 // CloseProjectFile closes the current project if one exists. If the project is unsaved and force is not true, then an UnsavedError is returned. If no project is open, then NoProjectError is returned.

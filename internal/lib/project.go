@@ -2,6 +2,7 @@ package lib
 
 import (
 	"fmt"
+	"treesource/internal/do"
 
 	"github.com/google/uuid"
 )
@@ -13,6 +14,16 @@ type Project struct {
 	Path        string      `json:"Path" yaml:"Path"`               // Path from which the project file was read and should be saved to.
 	Directories []Directory `json:"Directories" yaml:"Directories"` // Directories to pull from as sources.
 	changed     bool
+	history     do.History[*Project]
+}
+
+func NewProject() *Project {
+	p := &Project{
+		history: do.History[*Project]{},
+	}
+	p.history.Target = p
+
+	return p
 }
 
 // Changed represents if the project has unsaved changes.
@@ -21,6 +32,7 @@ func (p *Project) Changed() bool {
 }
 
 func (p *Project) Change() {
+	p.Emit(EventProjectChange, nil)
 	p.changed = true
 }
 
@@ -52,17 +64,15 @@ func (p *Project) AddDirectory(name string, ignoreDot bool) error {
 		Emitter:    *NewEmitter(),
 	}
 
-	p.Emit(EventDirectoryAdd, DirectoryAddEvent{
-		UUID: d.UUID,
-		Path: d.Path,
-	})
-
-	p.Directories = append(p.Directories, d)
-
-	err := p.InitDirectory(&d)
+	/*err := p.InitDirectory(&d)
 	if err != nil {
 		panic(err)
-	}
+	}*/
+
+	p.history.PushAndApply(&AddDirectoryAction{
+		Index:     len(p.Directories),
+		Directory: *d.Clone(),
+	})
 
 	p.changed = true
 
@@ -89,9 +99,9 @@ func (p *Project) InitDirectory(d *Directory) error {
 func (p *Project) RemoveDirectoryByUUID(UUID uuid.UUID) error {
 	for i, d := range p.Directories {
 		if UUID.String() == d.UUID.String() {
-			p.Directories = append(p.Directories[:i], p.Directories[i+1:]...)
-			p.Emit(EventDirectoryRemove, DirectoryRemoveEvent{
-				UUID: d.UUID,
+			p.history.PushAndApply(&RemoveDirectoryAction{
+				Directory: *d.Clone(),
+				Index:     i,
 			})
 			return nil
 		}
@@ -130,16 +140,19 @@ func (p *Project) EntryCallback(e Event) {
 }
 
 func (p *Project) EntryAddCallback(e Event) {
+	p.Changed()
 	fmt.Println(EventDirectoryEntryAdd, e)
 	p.Emit(EventDirectoryEntryAdd, e)
 }
 
 func (p *Project) EntryMissingCallback(e Event) {
+	p.Changed()
 	fmt.Println(EventDirectoryEntryMissing, e)
 	p.Emit(EventDirectoryEntryMissing, e)
 }
 
 func (p *Project) EntryFoundCallback(e Event) {
+	p.Changed()
 	fmt.Println(EventDirectoryEntryFound, e)
 	p.Emit(EventDirectoryEntryFound, e)
 }
