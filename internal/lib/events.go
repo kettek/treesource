@@ -14,62 +14,58 @@ const EventDirectory string = "directory"
 
 type DirectoryEvent struct {
 	UUID uuid.UUID
-	Name string
 }
 
 const EventDirectoryAdd string = "directory-add"
 
 type DirectoryAddEvent struct {
 	UUID uuid.UUID
-	Name string
+	Path string
 }
 
 const EventDirectoryRemove string = "directory-remove"
 
 type DirectoryRemoveEvent struct {
 	UUID uuid.UUID
-	Name string
 }
 
 const EventDirectorySync string = "directory-sync"
 
 type DirectorySyncEvent struct {
 	UUID uuid.UUID
-	Name string
 }
 
 const EventDirectorySynced string = "directory-synced"
 
 type DirectorySyncedEvent struct {
 	UUID  uuid.UUID
-	Name  string
 	Error error
 }
 
 const EventDirectoryEntry string = "directory-entry"
 
 type DirectoryEntryEvent struct {
-	Name  string
+	UUID  uuid.UUID
 	Entry *DirectoryEntry
 }
 
 const EventDirectoryEntryAdd string = "directory-entry-add"
 
 type DirectoryEntryAddEvent struct {
-	Name  string
+	UUID  uuid.UUID
 	Entry *DirectoryEntry
 }
 
 const EventDirectoryEntryMissing string = "directory-entry-missing"
 
 type DirectoryEntryMissingEvent struct {
-	Name  string
+	UUID  uuid.UUID
 	Entry *DirectoryEntry
 }
 
 const EventDirectoryEntryFound string = "directory-entry-found"
 
 type DirectoryEntryFoundEvent struct {
-	Name  string
+	UUID  uuid.UUID
 	Entry *DirectoryEntry
 }

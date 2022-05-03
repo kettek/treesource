@@ -1,7 +1,7 @@
 <script lang="ts">
   import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
-  import { HasProject, ListFiles, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory } from '../wailsjs/go/main/WApp.js'
+  import { HasProject, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory, Ready } from '../wailsjs/go/main/WApp.js'
   import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
   import { lib } from '../wailsjs/go/models'
   import * as Dialog from '../wailsjs/go/main/Dialog'
@@ -11,7 +11,6 @@
   import Menu from './sections/Menu.svelte'
   import Directories from './sections/Directories.svelte'
 
-  let currentFiles: (lib.DirEntry[]|Error) = []
   let path: string
 
   let project: lib.Project
@@ -20,25 +19,6 @@
   let directories: lib.Directory[] = []
 
   $: title = project ? project.Title : ''
-
-  $: inRoot = path === '/' || path === ''
-
-  async function getFiles() {
-    try {
-      currentFiles = await ListFiles(path)
-    } catch(err) {
-      console.log(err)
-    }
-  }
-  async function navigate(to: lib.DirEntry) {
-    if (!to.Info.IsDir) return
-    // TODO: Send request to move to a directory, then wait for a response.
-    path = path+"/" + to.Name
-    await getFiles()
-  }
-  async function up() {
-    // TODO: Send request to move up a directory, then wait for a response.
-  }
 
   onMount(() => {
     let subs = []
@@ -186,7 +166,6 @@
     }, -1)
     EventsOnMultiple('directory', (data: any) => {
       if (!directories.find(v=>v.UUID===data.UUID)) {
-        data.Path = data.Name // FIXME
         directories = [...directories, new lib.Directory(data)]
         if (!directories[directories.length-1].Entries) {
           directories[directories.length-1].Entries = []
@@ -195,7 +174,6 @@
     }, -1)
     EventsOnMultiple('directory-add', (data: any) => {
       if (!directories.find(v=>v.UUID===data.UUID)) {
-        data.Path = data.Name // FIXME
         directories = [...directories, new lib.Directory(data)]
         if (!directories[directories.length-1].Entries) {
           directories[directories.length-1].Entries = []
@@ -218,11 +196,24 @@
       if (!e.Tags) {
         e.Tags = []
       }
+      if (e.Missing === undefined) {
+        e.Missing = false
+      }
       d.Entries.push(e)
       directories = [...directories]
     }, -1)
     EventsOnMultiple('directory-entry-add', (data: any) => {
-      console.log('entry-add', data)
+      let d = directories.find(v=>v.UUID===data.UUID)
+      if (!d) return
+      let e = new lib.DirectoryEntry(data.Entry)
+      if (!e.Tags) {
+        e.Tags = []
+      }
+      if (e.Missing === undefined) {
+        e.Missing = false
+      }
+      d.Entries.push(e)
+      directories = [...directories]
     }, -1)
     EventsOnMultiple('directory-entry-remove', (data: any) => {
       console.log('entry-remove', data)
@@ -233,6 +224,8 @@
     EventsOnMultiple('directory-entry-found', (data: any) => {
       console.log('entry-found', data)
     }, -1)
+
+    Ready()
 
     return () => {
       subs.forEach(v=>actionPublisher.unsubscribe(v))

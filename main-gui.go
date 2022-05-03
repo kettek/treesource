@@ -75,9 +75,9 @@ func (w *WApp) Ready() {
 	// Also send the actual directory contents.
 
 	for _, d := range w.Project.Directories {
-		w.Project.Emit(lib.EventDirectory, lib.DirectoryEvent{
+		w.Project.Emit(lib.EventDirectory, lib.DirectoryAddEvent{
 			UUID: d.UUID,
-			Name: d.Path,
+			Path: d.Path,
 		})
 	}
 	for _, d := range w.Project.Directories {

@@ -30,7 +30,7 @@ func (d *Directory) Entry(name string) *DirectoryEntry {
 func (d *Directory) EmitAllEntries() {
 	for _, e := range d.Entries {
 		d.Emit("entry", &DirectoryEntryEvent{
-			Name:  e.Path,
+			UUID:  d.UUID,
 			Entry: e,
 		})
 	}
@@ -40,7 +40,6 @@ func (d *Directory) EmitAllEntries() {
 func (d *Directory) SyncEntries() error {
 	d.Emit("sync", &DirectorySyncEvent{
 		UUID: d.UUID,
-		Name: d.Path,
 	})
 	unmatchedEntries := make([]*DirectoryEntry, len(d.Entries))
 	copy(unmatchedEntries, d.Entries)
@@ -66,7 +65,7 @@ func (d *Directory) SyncEntries() error {
 						Path: localpath,
 					})
 					d.Emit("add", &DirectoryEntryAddEvent{
-						Name:  d.Path,
+						UUID:  d.UUID,
 						Entry: d.Entries[len(d.Entries)-1],
 					})
 				} else {
@@ -79,7 +78,7 @@ func (d *Directory) SyncEntries() error {
 							if e.Missing {
 								e.Missing = false
 								d.Emit("found", &DirectoryEntryFoundEvent{
-									Name:  d.Path,
+									UUID:  d.UUID,
 									Entry: e,
 								})
 							}
@@ -89,23 +88,23 @@ func (d *Directory) SyncEntries() error {
 				}
 			}
 		}
-
-		// Mark any unmatched entries as missing.
-		for _, e := range unmatchedEntries {
-			for i, e2 := range d.Entries {
-				if e.Path == e2.Path {
-					d.Entries[i].Missing = true
-					d.Emit("missing", &DirectoryEntryMissingEvent{
-						Name:  d.Path,
-						Entry: e,
-					})
-					break
-				}
-			}
-		}
 	}
 
 	walk("", d.Path)
+
+	// Mark any unmatched entries as missing.
+	for _, e := range unmatchedEntries {
+		for i, e2 := range d.Entries {
+			if e.Path == e2.Path {
+				d.Entries[i].Missing = true
+				d.Emit("missing", &DirectoryEntryMissingEvent{
+					UUID:  d.UUID,
+					Entry: e,
+				})
+				break
+			}
+		}
+	}
 
 	var err error
 	if len(errors) > 0 {
@@ -114,7 +113,6 @@ func (d *Directory) SyncEntries() error {
 
 	d.Emit("synced", &DirectorySyncedEvent{
 		UUID:  d.UUID,
-		Name:  d.Path,
 		Error: err,
 	})
 	return err

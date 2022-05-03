@@ -52,6 +52,24 @@ func (p *Project) AddDirectory(name string, ignoreDot bool) error {
 		Emitter:    *NewEmitter(),
 	}
 
+	p.Emit(EventDirectoryAdd, DirectoryAddEvent{
+		UUID: d.UUID,
+		Path: d.Path,
+	})
+
+	p.Directories = append(p.Directories, d)
+
+	err := p.InitDirectory(&d)
+	if err != nil {
+		panic(err)
+	}
+
+	p.changed = true
+
+	return nil
+}
+
+func (p *Project) InitDirectory(d *Directory) error {
 	d.On("sync", p.SyncDirectoryCallback)
 	d.On("synced", p.SyncedDirectoryCallback)
 	d.On("entry", p.EntryCallback)
@@ -59,24 +77,12 @@ func (p *Project) AddDirectory(name string, ignoreDot bool) error {
 	d.On("found", p.EntryFoundCallback)
 	d.On("missing", p.EntryMissingCallback)
 
-	err := d.SyncEntries()
-	if err != nil {
-		return err
+	if d.SyncOnLoad {
+		err := d.SyncEntries()
+		if err != nil {
+			return err
+		}
 	}
-
-	p.Directories = append(p.Directories, d)
-
-	p.Emit(EventDirectoryAdd, DirectoryAddEvent{
-		UUID: d.UUID,
-		Name: d.Path,
-	})
-	p.Emit(EventDirectory, DirectoryEvent{
-		UUID: d.UUID,
-		Name: d.Path,
-	})
-
-	p.changed = true
-
 	return nil
 }
 
@@ -86,7 +92,6 @@ func (p *Project) RemoveDirectoryByUUID(UUID uuid.UUID) error {
 			p.Directories = append(p.Directories[:i], p.Directories[i+1:]...)
 			p.Emit(EventDirectoryRemove, DirectoryRemoveEvent{
 				UUID: d.UUID,
-				Name: d.Path,
 			})
 			return nil
 		}

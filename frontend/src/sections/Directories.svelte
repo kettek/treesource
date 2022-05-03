@@ -19,7 +19,10 @@
   </Menus>
   <ul>
     {#each directories as directory, i}
-      <li class:selected={selectedDirectoryIndex===i} on:click={()=>selectedDirectoryIndex=i}>{directory.Path}</li>
+      <li class:selected={selectedDirectoryIndex===i} on:click={()=>selectedDirectoryIndex=i}>
+        <span class='title'>{directory.Path}</span>
+        <span class='count'>{directory.Entries.length}</span>
+      </li>
     {/each}
   </ul>
 </section>
@@ -45,8 +48,14 @@
     padding: 0;
     padding: .5em .5em;
     overflow: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
   }
   li.selected {
     background-color: var(--primary);
+  }
+  .count {
+    font-size: 60%;
   }
 </style>
