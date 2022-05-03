@@ -4,7 +4,7 @@
   import MenuItem from '../menu/MenuItem.svelte'
   import type { lib } from '../../wailsjs/go/models'
 
-  export let disabled: bool
+  export let disabled: boolean
   export let directories: lib.Directory[] = []
   let selectedDirectoryIndex: number = 0
   $: selectedDirectory = directories[selectedDirectoryIndex]
