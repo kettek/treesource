@@ -27,9 +27,11 @@
 
     subs.push(actionPublisher.subscribe('undo', async ({sourceTopic, message}) => {
       Undo()
+      await refresh()
     }))
     subs.push(actionPublisher.subscribe('redo', async ({sourceTopic, message}) => {
       Redo()
+      await refresh()
     }))
 
     
