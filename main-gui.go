@@ -19,7 +19,10 @@ var app *WApp
 
 func main() {
 	// Create an instance of the app structure
-	app = &WApp{*lib.NewApp()}
+	app = &WApp{
+		App:     *lib.NewApp(),
+		started: false,
+	}
 
 	if err := lib.EnsureSession("default"); err != nil {
 		panic(err)
@@ -74,9 +77,14 @@ func (d *Dialog) Message(options runtime.MessageDialogOptions) (string, error) {
 
 type WApp struct {
 	lib.App
+	started bool
 }
 
 func (w *WApp) Ready() {
+	if !w.started && w.Session.Project != "" {
+		w.LoadProjectFile(w.Session.Project, true)
+		w.started = true
+	}
 	if w.Project == nil {
 		return
 	}
