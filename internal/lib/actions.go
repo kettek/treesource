@@ -5,12 +5,13 @@ import (
 	"treesource/internal/do"
 )
 
+// AddDirectoryAction adds the given directory at the provided index.
 type AddDirectoryAction struct {
-	// Full directory state!
 	Directory Directory
 	Index     int
 }
 
+// Apply does the obvious.
 func (a *AddDirectoryAction) Apply(p *Project) {
 	fmt.Println("action: apply add dir")
 	if len(p.Directories) == a.Index {
@@ -29,6 +30,7 @@ func (a *AddDirectoryAction) Apply(p *Project) {
 	p.Directories[a.Index].EmitAllEntries()
 }
 
+// Unapply does the obvious.
 func (a *AddDirectoryAction) Unapply(p *Project) {
 	fmt.Println("action: unapply add dir")
 	p.Directories = append(p.Directories[:a.Index], p.Directories[a.Index+1:]...)
@@ -37,12 +39,13 @@ func (a *AddDirectoryAction) Unapply(p *Project) {
 	})
 }
 
+// RemoveDirectoryAction removes the directory at the given index.
 type RemoveDirectoryAction struct {
-	// Full directory state!
 	Directory Directory
 	Index     int
 }
 
+// Apply does the obvious.
 func (a *RemoveDirectoryAction) Apply(p *Project) {
 	fmt.Println("action: apply remove dir")
 	for i, d := range p.Directories {
@@ -56,6 +59,7 @@ func (a *RemoveDirectoryAction) Apply(p *Project) {
 	}
 }
 
+// Unapply does the obvious.
 func (a *RemoveDirectoryAction) Unapply(p *Project) {
 	fmt.Println("action: unapply remove dir")
 	if len(p.Directories) == a.Index {
@@ -86,16 +90,19 @@ func (a *SyncDirectoryAction) Unapply(p *Project) {
 	fmt.Println("action: unapply sync dir")
 }
 
+// GroupedAction represents a collection of actions.
 type GroupedAction struct {
 	Actions []do.Action[*Project]
 }
 
+// Apply applies the contained actions from the start to the end.
 func (a *GroupedAction) Apply(p *Project) {
 	for _, a2 := range a.Actions {
 		a2.Apply(p)
 	}
 }
 
+// Unapply unapplies the contains actions from the end to the start.
 func (a *GroupedAction) Unapply(p *Project) {
 	for i := len(a.Actions); i > 0; i-- {
 		a.Actions[i].Unapply(p)
