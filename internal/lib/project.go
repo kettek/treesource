@@ -9,7 +9,7 @@ import (
 
 // Project represents a full treesource project.
 type Project struct {
-	Emitter
+	Emitter     `json:"-" yaml:"-"`
 	Title       string      `json:"Title" yaml:"Title"`             // Title of the project.
 	Path        string      `json:"Path" yaml:"Path"`               // Path from which the project file was read and should be saved to.
 	Directories []Directory `json:"Directories" yaml:"Directories"` // Directories to pull from as sources.
