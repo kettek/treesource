@@ -21,8 +21,18 @@ func main() {
 	// Create an instance of the app structure
 	app = &WApp{*lib.NewApp()}
 
+	if err := lib.EnsureSession("default"); err != nil {
+		panic(err)
+	}
+
+	session, err := lib.LoadSession("default")
+	if err != nil {
+		panic(err)
+	}
+	app.Session = session
+
 	// Create application with options
-	err := wails.Run(&options.App{
+	err = wails.Run(&options.App{
 		Title:  "treesource",
 		Width:  1280,
 		Height: 720,
@@ -91,6 +101,8 @@ func (w *WApp) NewProject(name string, dir string, ignoreDot bool) error {
 		runtime.EventsEmit(w.Context(), "project-load", w.Project)
 		runtime.WindowSetTitle(w.Context(), fmt.Sprintf("%s - %s", w.Project.Title, "treesource"))
 		w.InitProject()
+		w.Session.Project = w.Project.Path
+		w.Session.PendingSave()
 	}
 	return err
 }
@@ -105,6 +117,8 @@ func (w *WApp) LoadProjectFile(name string, force bool) error {
 			w.Project.Unchange()
 		}
 		w.InitProject()
+		w.Session.Project = w.Project.Path
+		w.Session.PendingSave()
 	}
 	return err
 }
@@ -151,6 +165,8 @@ func (w *WApp) CloseProjectFile(force bool) error {
 	if err == nil {
 		runtime.EventsEmit(w.Context(), "project-unload", nil)
 		runtime.WindowSetTitle(w.Context(), fmt.Sprintf("%s", "treesource"))
+		w.Session.Project = ""
+		w.Session.PendingSave()
 	}
 	return err
 }

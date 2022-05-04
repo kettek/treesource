@@ -14,8 +14,8 @@ import (
 // App struct
 type App struct {
 	ctx     context.Context
-	views   []*DirView
 	Project *Project
+	Session *Session
 }
 
 // NewApp creates a new App application struct
