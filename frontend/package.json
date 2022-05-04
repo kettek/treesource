@@ -20,7 +20,7 @@
     "vite": "^2.9.5"
   },
   "dependencies": {
-    "@kettek/filepaths-to-tree": "^0.0.2",
+    "@kettek/filepaths-to-tree": "^0.1.0",
     "@kettek/pubsub": "^0.3.1"
   }
 }
