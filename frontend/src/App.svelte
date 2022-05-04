@@ -10,6 +10,7 @@
   import { onMount } from 'svelte'
   import Menu from './sections/Menu.svelte'
   import Directories from './sections/Directories.svelte'
+  import * as ftt from '@kettek/filepaths-to-tree'
 
   let path: string
 
@@ -19,6 +20,7 @@
   let redoable: boolean = false
 
   let directories: lib.Directory[] = []
+  let directoryTrees: any = {}
 
   $: title = project ? project.Title : ''
 
@@ -160,6 +162,7 @@
     
     // Set up runtime event receival.
     EventsOnMultiple('project-load', async (data: any) => {
+      directoryTrees = {}
       directories = []
       project = await GetProject()
       console.log("project load", project.Directories)
@@ -172,6 +175,7 @@
       project = undefined
       changed = false
       directories = []
+      directoryTrees = {}
       await refresh()
     }, -1)
 
@@ -198,10 +202,12 @@
           directories[directories.length-1].Entries = []
         }
       }
+      directoryTrees[data.UUID] = {}
       await refresh()
     }, -1)
     EventsOnMultiple('directory-remove', async (data: any) => {
       directories = directories.filter(v=>data.UUID!==v.UUID)
+      delete directoryTrees[data.UUID]
       await refresh()
     }, -1)
     EventsOnMultiple('directory-sync', async (data: any) => {
@@ -224,6 +230,7 @@
       }
       d.Entries.push(e)
       directories = [...directories]
+      ftt.Insert(directoryTrees[data.UUID], e.Path, e)
     }, -1)
     EventsOnMultiple('directory-entry-add', async (data: any) => {
       /*let d = directories.find(v=>v.UUID===data.UUID)
@@ -241,6 +248,7 @@
     }, -1)
     EventsOnMultiple('directory-entry-remove', async (data: any) => {
       console.log('entry-remove', data)
+      ftt.Remove(directoryTrees[data.UUID], data.Entry.Path)
       await refresh()
     }, -1)
     EventsOnMultiple('directory-entry-missing', async (data: any) => {
