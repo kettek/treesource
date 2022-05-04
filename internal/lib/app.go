@@ -118,7 +118,7 @@ func (a *App) SaveProject(force bool) error {
 	if a.Project == nil {
 		return &NoProjectError{}
 	}
-	if a.Project.Changed() || force {
+	if a.Unsaved() || force {
 		b, err := yaml.Marshal(a.Project)
 		if err != nil {
 			return err
@@ -127,7 +127,7 @@ func (a *App) SaveProject(force bool) error {
 		if err != nil {
 			return err
 		}
-		a.Project.changed = false
+		a.Project.history.SavedPos = a.Project.history.Pos
 	}
 
 	return nil
@@ -198,6 +198,13 @@ func (a *App) Redoable() bool {
 		return false
 	}
 	return a.Project.history.Redoable()
+}
+
+func (a *App) Unsaved() bool {
+	if a.Project == nil {
+		return false
+	}
+	return a.Project.history.SavedPos != a.Project.history.Pos
 }
 
 // CloseProjectFile closes the current project if one exists. If the project is unsaved and force is not true, then an UnsavedError is returned. If no project is open, then NoProjectError is returned.

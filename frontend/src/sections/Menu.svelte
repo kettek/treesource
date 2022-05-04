@@ -7,9 +7,9 @@
   import type { lib } from '../../wailsjs/go/models'
 
   export let project: lib.Project
-  export let changed: boolean
   export let undoable: boolean
   export let redoable: boolean
+  export let unsaved: boolean
 </script>
 
 <Menus>
@@ -36,7 +36,7 @@
           </MenuItem>
         </MenuList>
         <MenuSplit />
-        <MenuItem action='file-save' disabled={!project || !changed}>
+        <MenuItem action='file-save' disabled={!unsaved}>
           Save
         </MenuItem>
         <MenuSplit />

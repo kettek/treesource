@@ -2,20 +2,25 @@ package do
 
 // History represents a stack of actions that can be undone or redone.
 type History[T any] struct {
-	Target T           // Target is the underlying data that should be changed through the application or reverse application of actions.
-	Stack  []Action[T] // Stack is the current stack of actions.
-	Pos    int         // Pos is the internal action position within the stack.
+	Target   T           // Target is the underlying data that should be changed through the application or reverse application of actions.
+	Stack    []Action[T] // Stack is the current stack of actions.
+	Pos      int         // Pos is the internal action position within the stack.
+	SavedPos int         // SavedPos is the last saved position, used externally.
 }
 
 // Reset empties the history and sets the position to 0.
 func (d *History[T]) Reset() {
 	d.Stack = make([]Action[T], 0)
 	d.Pos = 0
+	d.SavedPos = 0
 }
 
 // Push pushes a new action onto the stack.
 func (d *History[T]) Push(a Action[T]) {
 	d.Stack = append(d.Stack[:d.Pos], a)
+	if d.SavedPos > d.Pos {
+		d.SavedPos = -1
+	}
 	d.Pos++
 }
 
