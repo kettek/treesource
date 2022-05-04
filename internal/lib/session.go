@@ -62,7 +62,7 @@ func LoadSession(name string) (*Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.path = p
+	c.path = name
 
 	b, err := os.ReadFile(p)
 	if err != nil {
@@ -71,7 +71,7 @@ func LoadSession(name string) (*Session, error) {
 
 	err = yaml.Unmarshal(b, c)
 
-	return nil, err
+	return c, err
 }
 
 // GetSessionPath returns the path for the target session.
@@ -83,14 +83,14 @@ func GetSessionPath(name string) (string, error) {
 	return filepath.Join(p, name+".yml"), err
 }
 
-// GetSessionDir returns `os.UserSession.Dir() + "treesource"`
+// GetSessionDir returns `os.UserSession.Dir() + "treesource" + "sessions"`
 func GetSessionDir() (string, error) {
 	s, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	s = filepath.Join(s, "treesource")
+	s = filepath.Join(s, "treesource", "sessions")
 
 	return s, err
 }
