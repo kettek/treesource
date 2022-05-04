@@ -156,6 +156,14 @@
       RemoveProjectDirectory(message)
     }))
 
+    // Views
+    subs.push(actionPublisher.subscribe('view-add', async({message}) => {
+      console.log('TODO: Add view for', message)
+    }))
+    subs.push(actionPublisher.subscribe('view-remove', async({message}) => {
+      console.log('TODO: Remove view for', message)
+    }))
+
     async function refresh() {
       undoable = await Undoable()
       redoable = await Redoable()
@@ -195,6 +203,7 @@
           directories[directories.length-1].Entries = []
         }
       }
+      if (!directoryTrees[data.UUID]) directoryTrees[data.UUID] = {}
       await refresh()
     }, -1)
     EventsOnMultiple('directory-add', async (data: any) => {
@@ -204,7 +213,7 @@
           directories[directories.length-1].Entries = []
         }
       }
-      directoryTrees[data.UUID] = {}
+      if (!directoryTrees[data.UUID]) directoryTrees[data.UUID] = {}
       await refresh()
     }, -1)
     EventsOnMultiple('directory-remove', async (data: any) => {

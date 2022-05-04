@@ -3,6 +3,7 @@
   import MenuBar from '../menu/MenuBar.svelte'
   import MenuItem from '../menu/MenuItem.svelte'
   import type { lib } from '../../wailsjs/go/models'
+  import { actionPublisher } from '..//actions'
 
   export let disabled: boolean
   export let directories: lib.Directory[] = []
@@ -19,7 +20,7 @@
   </Menus>
   <ul>
     {#each directories as directory, i}
-      <li class:selected={selectedDirectoryIndex===i} on:click={()=>selectedDirectoryIndex=i}>
+      <li class:selected={selectedDirectoryIndex===i} on:click={()=>selectedDirectoryIndex=i} on:dblclick={()=>actionPublisher.publish('view-add', directory.UUID)}>
         <span class='title'>{directory.Path}</span>
         <span class='count'>{directory.Entries.length}</span>
       </li>
