@@ -375,7 +375,7 @@
   }
   section.view__view {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto;
     background: var(--secondary-dark);
   }
   section.view__info {
