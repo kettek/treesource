@@ -1,5 +1,5 @@
 export class DirectoryView {
-  uuid: number[]
+  uuid: number[] | string
   directory: number[]
   wd: string
 
@@ -19,7 +19,7 @@ export class DirectoryView {
 }
 
 export class TagsView {
-  uuid: number[]
+  uuid: number[] | string
   tags: string[]
   constructor(o: any) {
     if (o.uuid) {

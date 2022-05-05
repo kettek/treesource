@@ -13,6 +13,7 @@
   import Directories from './sections/Directories.svelte'
   import * as ftt from '@kettek/filepaths-to-tree'
   import { DirectoryView, TagsView } from './models/views'
+  import Views from './sections/Views.svelte'
 
   let path: string
 
@@ -294,9 +295,9 @@
         return
       }
       directoryViews = [...directoryViews, new DirectoryView(data.View)]
-      console.log(directoryViews)
     }, -1)
     EventsOnMultiple('view-directory-remove', async (data: any) => {
+      console.log('remove view', data.View.uuid, typeof data.View.uuid)
       directoryViews = directoryViews.filter(v=>v.uuid!==data.View.uuid)
     }, -1)
     EventsOnMultiple('view-tags-add', async (data: any) => {
@@ -304,7 +305,6 @@
         return
       }
       tagsViews = [...tagsViews, new TagsView(data.View)]
-      console.log(tagsViews)
     }, -1)
     EventsOnMultiple('view-tags-remove', async (data: any) => {
       tagsViews = tagsViews.filter(v=>v.uuid!==data.View.uuid)
@@ -335,8 +335,7 @@
             </SplitPane>
           </section>
           <section slot=b class='view__view'>
-            <div class='view__view__top'>tabs & viewmenu</div>
-            <div class='view__view__items'>files</div>
+            <Views tagsViews={tagsViews} directoryViews={directoryViews}></Views>
             <div class='view__view__controls'>controls</div>
           </section>
         </SplitPane>

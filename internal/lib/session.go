@@ -154,16 +154,18 @@ func (s *Session) AddDirectoryView(u uuid.UUID) error {
 	s.Emit(EventViewDirectoryAdd, ViewDirectoryAddEvent{
 		View: s.Views.Directories[len(s.Views.Directories)-1],
 	})
+	s.PendingSave()
 	return nil
 }
 
 func (s *Session) RemoveDirectoryView(u uuid.UUID) error {
 	for i, d := range s.Views.Directories {
-		if d.Directory.String() == u.String() {
+		if d.UUID.String() == u.String() {
 			s.Views.Directories = append(s.Views.Directories[:i], s.Views.Directories[i+1:]...)
 			s.Emit(EventViewDirectoryRemove, ViewDirectoryRemoveEvent{
-				View: s.Views.Directories[len(s.Views.Directories)-1],
+				View: d,
 			})
+			s.PendingSave()
 			return nil
 		}
 	}
@@ -180,6 +182,7 @@ func (s *Session) AddTagsView(tags []string) error {
 	s.Emit(EventViewTagsAdd, ViewTagsAddEvent{
 		View: s.Views.Tags[len(s.Views.Tags)-1],
 	})
+	s.PendingSave()
 	return nil
 }
 
@@ -188,9 +191,9 @@ func (s *Session) RemoveTagsView(u uuid.UUID) error {
 		if t.UUID.String() == u.String() {
 			s.Views.Tags = append(s.Views.Tags[:i], s.Views.Tags[i+1:]...)
 			s.Emit(EventViewTagsRemove, ViewTagsRemoveEvent{
-				View: s.Views.Tags[len(s.Views.Tags)-1],
+				View: t,
 			})
-
+			s.PendingSave()
 			return nil
 		}
 	}
