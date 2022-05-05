@@ -12,5 +12,7 @@
     text-align: left;
     border-bottom: 1px solid teal;
     display: flex;
+    user-select: none;
+    -webkit-user-select: none;
   }
 </style>
