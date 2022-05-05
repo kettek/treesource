@@ -74,3 +74,30 @@ type DirectoryEntryFoundEvent struct {
 	UUID  uuid.UUID
 	Entry *DirectoryEntry
 }
+
+/*
+Session -> View events
+*/
+const EventViewDirectoryAdd string = "view-directory-add"
+
+type ViewDirectoryAddEvent struct {
+	View *DirectoryView
+}
+
+const EventViewDirectoryRemove string = "view-directory-remove"
+
+type ViewDirectoryRemoveEvent struct {
+	View *DirectoryView
+}
+
+const EventViewTagsAdd string = "view-tags-add"
+
+type ViewTagsAddEvent struct {
+	View *TagsView
+}
+
+const EventViewTagsRemove string = "view-tags-remove"
+
+type ViewTagsRemoveEvent struct {
+	View *TagsView
+}

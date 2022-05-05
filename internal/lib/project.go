@@ -119,7 +119,9 @@ func (p *Project) SyncDirectory(name string) error {
 			return nil
 		}
 	}
-	return &MissingDirectoryError{name}
+	return &MissingDirectoryError{
+		dir: name,
+	}
 }
 
 //

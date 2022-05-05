@@ -34,6 +34,10 @@ func main() {
 	}
 	app.Session = session
 
+	if err := app.SetupSession(); err != nil {
+		panic(err)
+	}
+
 	// Create application with options
 	err = wails.Run(&options.App{
 		Title:  "treesource",
@@ -101,6 +105,27 @@ func (w *WApp) Ready() {
 	for _, d := range w.Project.Directories {
 		d.EmitAllEntries()
 	}
+}
+
+func (w *WApp) SetupSession() error {
+	if w.Session == nil {
+		return &lib.MissingSessionError{}
+	}
+	// Setup session event handling.
+	app.Session.On(lib.EventViewDirectoryAdd, func(e lib.Event) {
+		runtime.EventsEmit(app.Context(), lib.EventViewDirectoryAdd, e)
+	})
+	app.Session.On(lib.EventViewDirectoryRemove, func(e lib.Event) {
+		runtime.EventsEmit(app.Context(), lib.EventViewDirectoryRemove, e)
+	})
+	app.Session.On(lib.EventViewTagsAdd, func(e lib.Event) {
+		runtime.EventsEmit(app.Context(), lib.EventViewTagsAdd, e)
+	})
+	app.Session.On(lib.EventViewTagsRemove, func(e lib.Event) {
+		runtime.EventsEmit(app.Context(), lib.EventViewTagsRemove, e)
+	})
+
+	return nil
 }
 
 func (w *WApp) NewProject(name string, dir string, ignoreDot bool) error {

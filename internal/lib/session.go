@@ -5,16 +5,18 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/google/uuid"
 	"gopkg.in/yaml.v3"
 )
 
 // Session represents the local session for treesource.
 type Session struct {
+	Emitter `json:"-" yaml:"-"`
 	path    string
 	Project string `json:"project" yaml:"project"`
 	Views   struct {
-		Directories []DirectoryView
-		Tags        []TagsView
+		Directories []*DirectoryView
+		Tags        []*TagsView
 	}
 	canceledSave chan struct{}
 }
@@ -55,6 +57,7 @@ func (c *Session) PendingSave() {
 // LoadSession loads the session file.
 func LoadSession(name string) (*Session, error) {
 	c := &Session{
+		Emitter:      *NewEmitter(),
 		canceledSave: make(chan struct{}),
 	}
 
@@ -126,4 +129,57 @@ func EnsureSession(name string) error {
 		return err
 	}
 	return nil
+}
+
+// Views
+func (s *Session) AddDirectoryView(u uuid.UUID) error {
+	s.Views.Directories = append(s.Views.Directories, &DirectoryView{
+		Directory: u,
+	})
+	s.Emit(EventViewDirectoryAdd, ViewDirectoryAddEvent{
+		View: s.Views.Directories[len(s.Views.Directories)-1],
+	})
+	return nil
+}
+
+func (s *Session) RemoveDirectoryView(u uuid.UUID) error {
+	for i, d := range s.Views.Directories {
+		if d.Directory.String() == u.String() {
+			s.Views.Directories = append(s.Views.Directories[:i], s.Views.Directories[i+1:]...)
+			s.Emit(EventViewDirectoryRemove, ViewDirectoryRemoveEvent{
+				View: s.Views.Directories[len(s.Views.Directories)-1],
+			})
+			return nil
+		}
+	}
+	return &MissingDirectoryViewError{
+		uuid: u,
+	}
+}
+
+func (s *Session) AddTagView(tags []string) error {
+	s.Views.Tags = append(s.Views.Tags, &TagsView{
+		UUID: uuid.New(),
+		Tags: tags,
+	})
+	s.Emit(EventViewTagsAdd, ViewTagsAddEvent{
+		View: s.Views.Tags[len(s.Views.Tags)-1],
+	})
+	return nil
+}
+
+func (s *Session) RemoveTagView(u uuid.UUID) error {
+	for i, t := range s.Views.Tags {
+		if t.UUID.String() == u.String() {
+			s.Views.Tags = append(s.Views.Tags[:i], s.Views.Tags[i+1:]...)
+			s.Emit(EventViewTagsRemove, ViewTagsRemoveEvent{
+				View: s.Views.Tags[len(s.Views.Tags)-1],
+			})
+
+			return nil
+		}
+	}
+	return &MissingTagsViewError{
+		uuid: u,
+	}
 }
