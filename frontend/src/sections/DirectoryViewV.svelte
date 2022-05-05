@@ -4,17 +4,22 @@
   import type { DirectoryView, TagsView } from '../models/views'
 
   export let view: DirectoryView
+  export let directory: lib.Directory
   export let tree: Object
 
   $: entries = Object.entries(tree)
   $: folders = entries.filter(v=>!(v[1] instanceof lib.DirectoryEntry))
   $: files = entries.filter(v=>v[1] instanceof lib.DirectoryEntry)
 
+  async function travel(to) {
+    let t = [view.wd, to].filter(v=>v!=='').join('/')
+    console.log('travel', t)
+  }
 </script>
 
 <main>
   {#each folders as [key, folder] }
-    <div class="item folder">
+    <div class="item folder" on:dblclick={async ()=>await travel(key)}>
       <span>folder</span>
       <span class='title'>
         {key}
@@ -48,6 +53,8 @@
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
   }
   .item.folder {
     background: green;

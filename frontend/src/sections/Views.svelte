@@ -44,7 +44,7 @@
   </nav>
   <section>
     {#if directory}
-      <DirectoryViewV view={directoryView} tree={Find(directoryTrees[String(directory.UUID)], directoryView.wd)}></DirectoryViewV>
+      <DirectoryViewV view={directoryView} directory={directory} tree={Find(directoryTrees[String(directory.UUID)], directoryView.wd)}></DirectoryViewV>
     {/if}
   </section>
 </main>
