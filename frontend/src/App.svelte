@@ -1,7 +1,7 @@
 <script lang="ts">
   import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
-  import { HasProject, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory, Ready, Undoable, Redoable, Undo, Redo } from '../wailsjs/go/main/WApp.js'
+  import { HasProject, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory, Ready, Undoable, Redoable, Undo, Redo, Unsaved, SaveProject } from '../wailsjs/go/main/WApp.js'
   import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
   import { lib } from '../wailsjs/go/models'
   import * as Dialog from '../wailsjs/go/main/Dialog'
@@ -15,9 +15,9 @@
   let path: string
 
   let project: lib.Project
-  let changed: boolean
   let undoable: boolean = false
   let redoable: boolean = false
+  let unsaved: boolean = false
 
   let directories: lib.Directory[] = []
   let directoryTrees: any = {}
@@ -102,6 +102,10 @@
         throw error
       }
     }))
+    subs.push(actionPublisher.subscribe('file-save', async ({sourceTopic, message}) => {
+      let result = await SaveProject(false)
+      await refresh()
+    }))
     subs.push(actionPublisher.subscribe('file-close', async ({sourceTopic}) => {
       let error = await CloseProjectFile(false)
       if (error) {
@@ -110,7 +114,7 @@
     }))
     subs.push(actionPublisher.subscribe('quit', async ({message}) => {
       if (!message) {
-        if (project && changed) {
+        if (project && unsaved) {
           let result = await Dialog.Message({
             Type: "warning",
             Message: "The project has changes and is not saved. Quit anyway?",
@@ -167,6 +171,7 @@
     async function refresh() {
       undoable = await Undoable()
       redoable = await Redoable()
+      unsaved = await Unsaved()
       console.log('refresh', undoable, redoable)
     }
     
@@ -183,14 +188,12 @@
     EventsOnMultiple('project-unload', async (data: any) => {
       console.log("project unload", data)
       project = undefined
-      changed = false
       directories = []
       directoryTrees = {}
       await refresh()
     }, -1)
 
     EventsOnMultiple('project-changed', (data: boolean) => {
-      changed = data
     }, -1)
 
     EventsOnMultiple('directories', (data: any) => {
@@ -281,7 +284,7 @@
 
 <main>
   <section class='menu'>
-    <Menu project={project} changed={changed} undoable={undoable} redoable={redoable}></Menu>
+    <Menu project={project} unsaved={unsaved} undoable={undoable} redoable={redoable}></Menu>
   </section>
   <section class='view'>
     <SplitPane type="horizontal" pos=80>

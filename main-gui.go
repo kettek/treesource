@@ -89,7 +89,7 @@ func (w *WApp) Ready() {
 		return
 	}
 	runtime.EventsEmit(w.Context(), "project-load", w.Project)
-	runtime.WindowSetTitle(w.Context(), fmt.Sprintf("%s - %s", w.Project.Title, "treesource"))
+	w.RefreshTitle()
 	// Also send the actual directory contents.
 
 	for _, d := range w.Project.Directories {
@@ -107,7 +107,7 @@ func (w *WApp) NewProject(name string, dir string, ignoreDot bool) error {
 	err := w.App.NewProject(name, dir, ignoreDot)
 	if err == nil {
 		runtime.EventsEmit(w.Context(), "project-load", w.Project)
-		runtime.WindowSetTitle(w.Context(), fmt.Sprintf("%s - %s", w.Project.Title, "treesource"))
+		w.RefreshTitle()
 		w.InitProject()
 		w.Session.Project = w.Project.Path
 		w.Session.PendingSave()
@@ -119,7 +119,7 @@ func (w *WApp) LoadProjectFile(name string, force bool) error {
 	err := w.App.LoadProjectFile(name, force)
 	if err == nil {
 		runtime.EventsEmit(w.Context(), "project-load", w.Project)
-		runtime.WindowSetTitle(w.Context(), fmt.Sprintf("%s - %s", w.Project.Title, "treesource"))
+		w.RefreshTitle()
 		if w.Project.Changed() {
 			runtime.EventsEmit(w.Context(), "project-changed")
 			w.Project.Unchange()
@@ -172,7 +172,7 @@ func (w *WApp) CloseProjectFile(force bool) error {
 	err := w.App.CloseProjectFile(force)
 	if err == nil {
 		runtime.EventsEmit(w.Context(), "project-unload", nil)
-		runtime.WindowSetTitle(w.Context(), fmt.Sprintf("%s", "treesource"))
+		w.RefreshTitle()
 		w.Session.Project = ""
 		w.Session.PendingSave()
 	}
@@ -185,4 +185,16 @@ func (w *WApp) AddProjectDirectory(dir string, ignoreDot bool) error {
 
 func (w *WApp) GetProject() *lib.Project {
 	return w.Project
+}
+
+func (w *WApp) RefreshTitle() {
+	title := "treesource"
+	if w.Project != nil {
+		if w.Unsaved() {
+			title = fmt.Sprintf("*%s - %s", w.Project.Title, title)
+		} else {
+			title = fmt.Sprintf("%s - %s", w.Project.Title, title)
+		}
+	}
+	runtime.WindowSetTitle(w.Context(), title)
 }
