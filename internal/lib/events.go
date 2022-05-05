@@ -101,3 +101,9 @@ const EventViewTagsRemove string = "view-tags-remove"
 type ViewTagsRemoveEvent struct {
 	View *TagsView
 }
+
+const EventViewSelect string = "view-select"
+
+type ViewSelectEvent struct {
+	UUID uuid.UUID
+}

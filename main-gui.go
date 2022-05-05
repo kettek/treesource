@@ -125,6 +125,9 @@ func (w *WApp) SetupSession() error {
 	app.Session.On(lib.EventViewTagsRemove, func(e lib.Event) {
 		runtime.EventsEmit(app.Context(), lib.EventViewTagsRemove, e)
 	})
+	app.Session.On(lib.EventViewSelect, func(e lib.Event) {
+		runtime.EventsEmit(app.Context(), lib.EventViewSelect, e)
+	})
 
 	return nil
 }
@@ -239,4 +242,8 @@ func (w *WApp) AddTagsView(tags []string) error {
 
 func (w *WApp) RemoveTagsView(u uuid.UUID) error {
 	return w.Session.RemoveTagsView(u)
+}
+
+func (w *WApp) SelectView(u uuid.UUID) {
+	w.Session.SelectView(u)
 }

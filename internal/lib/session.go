@@ -11,10 +11,11 @@ import (
 
 // Session represents the local session for treesource.
 type Session struct {
-	Emitter `json:"-" yaml:"-"`
-	path    string
-	Project string `json:"project" yaml:"project"`
-	Views   struct {
+	Emitter      `json:"-" yaml:"-"`
+	path         string
+	Project      string `json:"project" yaml:"project"`
+	SelectedView uuid.UUID
+	Views        struct {
 		Directories []*DirectoryView
 		Tags        []*TagsView
 	}
@@ -33,6 +34,7 @@ func (s *Session) Refresh() {
 			View: t,
 		})
 	}
+	s.SelectView(s.SelectedView)
 }
 
 // Save saves the session.
@@ -200,4 +202,12 @@ func (s *Session) RemoveTagsView(u uuid.UUID) error {
 	return &MissingTagsViewError{
 		uuid: u,
 	}
+}
+
+func (s *Session) SelectView(u uuid.UUID) {
+	s.SelectedView = u
+	s.Emit(EventViewSelect, &ViewSelectEvent{
+		UUID: u,
+	})
+	s.PendingSave()
 }

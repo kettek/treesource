@@ -2,7 +2,7 @@
   import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
   import { HasProject, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory, Ready, Undoable, Redoable, Undo, Redo, Unsaved, SaveProject } from '../wailsjs/go/main/WApp.js'
-  import { AddDirectoryView, RemoveDirectoryView, AddTagsView, RemoveTagsView } from '../wailsjs/go/main/WApp.js'
+  import { AddDirectoryView, RemoveDirectoryView, AddTagsView, RemoveTagsView, SelectView } from '../wailsjs/go/main/WApp.js'
   import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
   import { lib } from '../wailsjs/go/models'
   import * as Dialog from '../wailsjs/go/main/Dialog'
@@ -27,6 +27,7 @@
 
   let directoryViews: DirectoryView[] = []
   let tagsViews: TagsView[] = []
+  let selectedView: string = ''
 
   $: title = project ? project.Title : ''
 
@@ -179,6 +180,9 @@
     subs.push(actionPublisher.subscribe('view-tags-remove', async({message}) => {
       RemoveTagsView(message)
     }))
+    subs.push(actionPublisher.subscribe('view-select', async({message}) => {
+      SelectView(message)
+    }))
 
     async function refresh() {
       undoable = await Undoable()
@@ -257,6 +261,7 @@
       d.Entries.push(e)
       directories = [...directories]
       ftt.Insert(directoryTrees[data.UUID], e.Path, e)
+      directoryTrees = {...directoryTrees}
     }, -1)
     EventsOnMultiple('directory-entry-add', async (data: any) => {
       /*let d = directories.find(v=>v.UUID===data.UUID)
@@ -304,6 +309,9 @@
     EventsOnMultiple('view-tags-remove', async (data: any) => {
       tagsViews = tagsViews.filter(v=>v.uuid!==data.View.uuid)
     }, -1)
+    EventsOnMultiple('view-select', async (data: any) => {
+      selectedView = data.UUID
+    }, -1)
 
     Ready()
 
@@ -330,7 +338,7 @@
             </SplitPane>
           </section>
           <section slot=b class='view__view'>
-            <Views tagsViews={tagsViews} directoryViews={directoryViews}></Views>
+            <Views selectedView={selectedView} tagsViews={tagsViews} directoryViews={directoryViews} directories={directories} directoryTrees={directoryTrees}></Views>
             <div class='view__view__controls'>controls</div>
           </section>
         </SplitPane>
