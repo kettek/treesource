@@ -42,6 +42,8 @@
     text-align: left;
     background-color: var(--primary-dark);
     overflow-y: scroll;
+    user-select: none;
+    -webkit-user-select: none;
   }
   li {
     list-style: none;
@@ -52,6 +54,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
+    cursor: pointer;
   }
   li.selected {
     background-color: var(--primary);
