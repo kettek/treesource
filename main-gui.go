@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"treesource/internal/lib"
 
+	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -46,9 +47,6 @@ func main() {
 		Assets: assets,
 		Bind: []interface{}{
 			app,
-			&lib.Project{},
-			&lib.Directory{},
-			&lib.DirectoryEntry{},
 			&Dialog{},
 		},
 		OnStartup: app.Startup,
@@ -105,6 +103,9 @@ func (w *WApp) Ready() {
 	for _, d := range w.Project.Directories {
 		d.EmitAllEntries()
 	}
+
+	// Send session state.
+	w.Session.Refresh()
 }
 
 func (w *WApp) SetupSession() error {
@@ -222,4 +223,20 @@ func (w *WApp) RefreshTitle() {
 		}
 	}
 	runtime.WindowSetTitle(w.Context(), title)
+}
+
+func (w *WApp) AddDirectoryView(u uuid.UUID) error {
+	return w.Session.AddDirectoryView(u)
+}
+
+func (w *WApp) RemoveDirectoryView(u uuid.UUID) error {
+	return w.Session.RemoveDirectoryView(u)
+}
+
+func (w *WApp) AddTagsView(tags []string) error {
+	return w.Session.AddTagsView(tags)
+}
+
+func (w *WApp) RemoveTagsView(u uuid.UUID) error {
+	return w.Session.RemoveTagsView(u)
 }
