@@ -168,19 +168,15 @@
 
     // Views
     subs.push(actionPublisher.subscribe('view-directory-add', async({message}) => {
-      console.log('TODO: Add view for', message)
       AddDirectoryView(message)
     }))
     subs.push(actionPublisher.subscribe('view-directory-remove', async({message}) => {
-      console.log('TODO: Remove view for', message)
       RemoveDirectoryView(message)
     }))
     subs.push(actionPublisher.subscribe('view-tags-add', async({message}) => {
-      console.log('TODO: Add view for', message)
       AddTagsView(message)
     }))
     subs.push(actionPublisher.subscribe('view-tags-remove', async({message}) => {
-      console.log('TODO: Remove view for', message)
       RemoveTagsView(message)
     }))
 
@@ -297,7 +293,6 @@
       directoryViews = [...directoryViews, new DirectoryView(data.View)]
     }, -1)
     EventsOnMultiple('view-directory-remove', async (data: any) => {
-      console.log('remove view', data.View.uuid, typeof data.View.uuid)
       directoryViews = directoryViews.filter(v=>v.uuid!==data.View.uuid)
     }, -1)
     EventsOnMultiple('view-tags-add', async (data: any) => {
