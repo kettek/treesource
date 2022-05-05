@@ -2,6 +2,7 @@
   import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
   import { HasProject, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory, Ready, Undoable, Redoable, Undo, Redo, Unsaved, SaveProject } from '../wailsjs/go/main/WApp.js'
+  import { AddDirectoryView, RemoveDirectoryView, AddTagsView, RemoveTagsView } from '../wailsjs/go/main/WApp.js'
   import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
   import { lib } from '../wailsjs/go/models'
   import * as Dialog from '../wailsjs/go/main/Dialog'
@@ -11,6 +12,7 @@
   import Menu from './sections/Menu.svelte'
   import Directories from './sections/Directories.svelte'
   import * as ftt from '@kettek/filepaths-to-tree'
+  import { DirectoryView, TagsView } from './models/views'
 
   let path: string
 
@@ -21,6 +23,9 @@
 
   let directories: lib.Directory[] = []
   let directoryTrees: any = {}
+
+  let directoryViews: DirectoryView[] = []
+  let tagsViews: TagsView[] = []
 
   $: title = project ? project.Title : ''
 
@@ -161,11 +166,21 @@
     }))
 
     // Views
-    subs.push(actionPublisher.subscribe('view-add', async({message}) => {
+    subs.push(actionPublisher.subscribe('view-directory-add', async({message}) => {
       console.log('TODO: Add view for', message)
+      AddDirectoryView(message)
     }))
-    subs.push(actionPublisher.subscribe('view-remove', async({message}) => {
+    subs.push(actionPublisher.subscribe('view-directory-remove', async({message}) => {
       console.log('TODO: Remove view for', message)
+      RemoveDirectoryView(message)
+    }))
+    subs.push(actionPublisher.subscribe('view-tags-add', async({message}) => {
+      console.log('TODO: Add view for', message)
+      AddTagsView(message)
+    }))
+    subs.push(actionPublisher.subscribe('view-tags-remove', async({message}) => {
+      console.log('TODO: Remove view for', message)
+      RemoveTagsView(message)
     }))
 
     async function refresh() {
@@ -272,6 +287,27 @@
     EventsOnMultiple('directory-entry-found', async (data: any) => {
       console.log('entry-found', data)
       await refresh()
+    }, -1)
+    // View stuff
+    EventsOnMultiple('view-directory-add', async (data: any) => {
+      if (directoryViews.find(v=>v.uuid === data.View.uuid)) {
+        return
+      }
+      directoryViews = [...directoryViews, new DirectoryView(data.View)]
+      console.log(directoryViews)
+    }, -1)
+    EventsOnMultiple('view-directory-remove', async (data: any) => {
+      directoryViews = directoryViews.filter(v=>v.uuid!==data.View.uuid)
+    }, -1)
+    EventsOnMultiple('view-tags-add', async (data: any) => {
+      if (tagsViews.find(v=>v.uuid === data.View.uuid)) {
+        return
+      }
+      tagsViews = [...tagsViews, new TagsView(data.View)]
+      console.log(tagsViews)
+    }, -1)
+    EventsOnMultiple('view-tags-remove', async (data: any) => {
+      tagsViews = tagsViews.filter(v=>v.uuid!==data.View.uuid)
     }, -1)
 
     Ready()

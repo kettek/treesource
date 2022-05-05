@@ -21,6 +21,20 @@ type Session struct {
 	canceledSave chan struct{}
 }
 
+// Refresh causes all pertinent state to emit, so as to resync frontend.
+func (s *Session) Refresh() {
+	for _, d := range s.Views.Directories {
+		s.Emit(EventViewDirectoryAdd, ViewDirectoryAddEvent{
+			View: d,
+		})
+	}
+	for _, t := range s.Views.Tags {
+		s.Emit(EventViewTagsAdd, ViewTagsAddEvent{
+			View: t,
+		})
+	}
+}
+
 // Save saves the session.
 func (c *Session) Save() error {
 	p, err := GetSessionPath(c.path)
@@ -134,6 +148,7 @@ func EnsureSession(name string) error {
 // Views
 func (s *Session) AddDirectoryView(u uuid.UUID) error {
 	s.Views.Directories = append(s.Views.Directories, &DirectoryView{
+		UUID:      uuid.New(),
 		Directory: u,
 	})
 	s.Emit(EventViewDirectoryAdd, ViewDirectoryAddEvent{
@@ -157,7 +172,7 @@ func (s *Session) RemoveDirectoryView(u uuid.UUID) error {
 	}
 }
 
-func (s *Session) AddTagView(tags []string) error {
+func (s *Session) AddTagsView(tags []string) error {
 	s.Views.Tags = append(s.Views.Tags, &TagsView{
 		UUID: uuid.New(),
 		Tags: tags,
@@ -168,7 +183,7 @@ func (s *Session) AddTagView(tags []string) error {
 	return nil
 }
 
-func (s *Session) RemoveTagView(u uuid.UUID) error {
+func (s *Session) RemoveTagsView(u uuid.UUID) error {
 	for i, t := range s.Views.Tags {
 		if t.UUID.String() == u.String() {
 			s.Views.Tags = append(s.Views.Tags[:i], s.Views.Tags[i+1:]...)
