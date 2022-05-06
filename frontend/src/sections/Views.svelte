@@ -14,10 +14,19 @@
 
   $: directoryView = directoryViews.find(v=>v.uuid===selectedView)
   $: directory = directoryView ? directories.find(v => v.UUID === directoryView.directory) : undefined
+  $: {
+    if (directory) {
+      console.log("RAGE", directory, directoryTrees[String(directory.UUID)], directoryTrees)
+    }
+    console.log("poop", directoryView)
+  }
+  $: directoryTree = directory && directoryTrees[String(directory.UUID)] ? Find(directoryTrees[String(directory.UUID)], directoryView.wd) : undefined
 
   function getDirectoryTitle(uuid: string): string {
     let d = directories.find(v=> String(v.UUID) === uuid)
+      console.log("WTF", d)
     if (d) {
+      console.log("HAHA PATH", d.Path)
       let s = SplitPath(d.Path)
       return s[s.length-1]
     }
@@ -44,7 +53,7 @@
   </nav>
   <section>
     {#if directory}
-      <DirectoryViewV view={directoryView} directory={directory} tree={Find(directoryTrees[String(directory.UUID)], directoryView.wd)}></DirectoryViewV>
+      <DirectoryViewV view={directoryView} directory={directory} tree={directoryTree}></DirectoryViewV>
     {/if}
   </section>
 </main>

@@ -128,6 +128,9 @@ func (w *WApp) SetupSession() error {
 	app.Session.On(lib.EventViewSelect, func(e lib.Event) {
 		runtime.EventsEmit(app.Context(), lib.EventViewSelect, e)
 	})
+	app.Session.On(lib.EventViewDirectoryNavigate, func(e lib.Event) {
+		runtime.EventsEmit(app.Context(), lib.EventViewDirectoryNavigate, e)
+	})
 
 	return nil
 }
@@ -234,6 +237,10 @@ func (w *WApp) AddDirectoryView(u uuid.UUID) error {
 
 func (w *WApp) RemoveDirectoryView(u uuid.UUID) error {
 	return w.Session.RemoveDirectoryView(u)
+}
+
+func (w *WApp) NavigateDirectoryView(u uuid.UUID, wd string) error {
+	return w.Session.NavigateDirectoryView(u, wd)
 }
 
 func (w *WApp) AddTagsView(tags []string) error {

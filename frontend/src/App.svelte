@@ -2,7 +2,7 @@
   import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
   import { HasProject, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory, Ready, Undoable, Redoable, Undo, Redo, Unsaved, SaveProject } from '../wailsjs/go/main/WApp.js'
-  import { AddDirectoryView, RemoveDirectoryView, AddTagsView, RemoveTagsView, SelectView } from '../wailsjs/go/main/WApp.js'
+  import { AddDirectoryView, RemoveDirectoryView, AddTagsView, RemoveTagsView, SelectView, NavigateDirectoryView } from '../wailsjs/go/main/WApp.js'
   import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
   import { lib } from '../wailsjs/go/models'
   import * as Dialog from '../wailsjs/go/main/Dialog'
@@ -174,6 +174,9 @@
     subs.push(actionPublisher.subscribe('view-directory-remove', async({message}) => {
       RemoveDirectoryView(message)
     }))
+    subs.push(actionPublisher.subscribe('view-directory-navigate', async({message}) => {
+      NavigateDirectoryView(message.uuid, message.path)
+    }))
     subs.push(actionPublisher.subscribe('view-tags-add', async({message}) => {
       AddTagsView(message)
     }))
@@ -299,6 +302,13 @@
     }, -1)
     EventsOnMultiple('view-directory-remove', async (data: any) => {
       directoryViews = directoryViews.filter(v=>v.uuid!==data.View.uuid)
+    }, -1)
+    EventsOnMultiple('view-directory-navigate', async (data: any) => {
+      let d = directoryViews.find(v=>v.uuid === data.UUID)
+      if (d) {
+        d.wd = data.Path
+        directoryViews = [...directoryViews]
+      }
     }, -1)
     EventsOnMultiple('view-tags-add', async (data: any) => {
       if (tagsViews.find(v=>v.uuid === data.View.uuid)) {

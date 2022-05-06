@@ -3,7 +3,7 @@
   import MenuBar from '../menu/MenuBar.svelte'
   import MenuItem from '../menu/MenuItem.svelte'
   import type { lib } from '../../wailsjs/go/models'
-  import { actionPublisher } from '..//actions'
+  import { actionPublisher } from '../actions'
 
   export let disabled: boolean
   export let directories: lib.Directory[] = []

@@ -90,6 +90,13 @@ type ViewDirectoryRemoveEvent struct {
 	View *DirectoryView
 }
 
+const EventViewDirectoryNavigate string = "view-directory-navigate"
+
+type ViewDirectoryNavigateEvent struct {
+	UUID uuid.UUID
+	Path string
+}
+
 const EventViewTagsAdd string = "view-tags-add"
 
 type ViewTagsAddEvent struct {

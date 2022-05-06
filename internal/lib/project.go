@@ -96,6 +96,17 @@ func (p *Project) InitDirectory(d *Directory) error {
 	return nil
 }
 
+func (p *Project) GetDirectoryByUUID(u uuid.UUID) (*Directory, error) {
+	for _, d := range p.Directories {
+		if u.String() == d.UUID.String() {
+			return &d, nil
+		}
+	}
+	return nil, &MissingDirectoryError{
+		uuid: u,
+	}
+}
+
 func (p *Project) RemoveDirectoryByUUID(UUID uuid.UUID) error {
 	for i, d := range p.Directories {
 		if UUID.String() == d.UUID.String() {

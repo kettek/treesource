@@ -148,6 +148,17 @@ func EnsureSession(name string) error {
 }
 
 // Views
+func (s *Session) GetDirectoryView(u uuid.UUID) (*DirectoryView, error) {
+	for _, d := range s.Views.Directories {
+		if d.UUID.String() == u.String() {
+			return d, nil
+		}
+	}
+	return nil, &MissingDirectoryViewError{
+		uuid: u,
+	}
+}
+
 func (s *Session) AddDirectoryView(u uuid.UUID) error {
 	s.Views.Directories = append(s.Views.Directories, &DirectoryView{
 		UUID:      uuid.New(),
@@ -174,6 +185,32 @@ func (s *Session) RemoveDirectoryView(u uuid.UUID) error {
 	return &MissingDirectoryViewError{
 		uuid: u,
 	}
+}
+
+// NavigateDirectoryView adjusts the working directory by the given path. This does _not_ verify the path is truly traversable.
+func (s *Session) NavigateDirectoryView(u uuid.UUID, path string) error {
+	d, err := s.GetDirectoryView(u)
+	if err != nil {
+		return err
+	}
+
+	if path == ".." {
+		d.WD = filepath.Dir(d.WD)
+		if d.WD == "." {
+			d.WD = ""
+		}
+	} else if path == "/" {
+		d.WD = ""
+	} else {
+		d.WD = filepath.Join(d.WD, path)
+	}
+
+	s.Emit(EventViewDirectoryNavigate, ViewDirectoryNavigateEvent{
+		UUID: u,
+		Path: d.WD,
+	})
+
+	return nil
 }
 
 func (s *Session) AddTagsView(tags []string) error {
