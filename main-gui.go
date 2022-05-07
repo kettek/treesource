@@ -131,6 +131,9 @@ func (w *WApp) SetupSession() error {
 	app.Session.On(lib.EventViewDirectoryNavigate, func(e lib.Event) {
 		runtime.EventsEmit(app.Context(), lib.EventViewDirectoryNavigate, e)
 	})
+	app.Session.On(lib.EventViewSelectFiles, func(e lib.Event) {
+		runtime.EventsEmit(app.Context(), lib.EventViewSelectFiles, e)
+	})
 
 	return nil
 }
@@ -253,4 +256,8 @@ func (w *WApp) RemoveTagsView(u uuid.UUID) error {
 
 func (w *WApp) SelectView(u uuid.UUID) {
 	w.Session.SelectView(u)
+}
+
+func (w *WApp) SelectViewFiles(u uuid.UUID, files []string) {
+	w.Session.SelectViewFiles(u, files)
 }

@@ -213,6 +213,17 @@ func (s *Session) NavigateDirectoryView(u uuid.UUID, path string) error {
 	return nil
 }
 
+func (s *Session) GetTagsView(u uuid.UUID) (*TagsView, error) {
+	for _, t := range s.Views.Tags {
+		if t.UUID.String() == u.String() {
+			return t, nil
+		}
+	}
+	return nil, &MissingTagsViewError{
+		uuid: u,
+	}
+}
+
 func (s *Session) AddTagsView(tags []string) error {
 	s.Views.Tags = append(s.Views.Tags, &TagsView{
 		UUID: uuid.New(),
@@ -247,4 +258,25 @@ func (s *Session) SelectView(u uuid.UUID) {
 		UUID: u,
 	})
 	s.PendingSave()
+}
+
+func (s *Session) SelectViewFiles(u uuid.UUID, files []string) {
+	d, err := s.GetDirectoryView(u)
+	if err == nil {
+		d.Selected = files
+		s.Emit(EventViewSelectFiles, &ViewSelectFilesEvent{
+			UUID:     u,
+			Selected: files,
+		})
+		return
+	}
+	t, err := s.GetTagsView(u)
+	if err == nil {
+		t.Selected = files
+		s.Emit(EventViewSelectFiles, &ViewSelectFilesEvent{
+			UUID:     u,
+			Selected: files,
+		})
+		return
+	}
 }

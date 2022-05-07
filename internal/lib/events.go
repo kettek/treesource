@@ -97,6 +97,13 @@ type ViewDirectoryNavigateEvent struct {
 	Path string
 }
 
+const EventViewSelectFiles = "view-select-files"
+
+type ViewSelectFilesEvent struct {
+	UUID     uuid.UUID
+	Selected []string
+}
+
 const EventViewTagsAdd string = "view-tags-add"
 
 type ViewTagsAddEvent struct {

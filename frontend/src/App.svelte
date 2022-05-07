@@ -2,7 +2,7 @@
   import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
   import { HasProject, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory, Ready, Undoable, Redoable, Undo, Redo, Unsaved, SaveProject } from '../wailsjs/go/main/WApp.js'
-  import { AddDirectoryView, RemoveDirectoryView, AddTagsView, RemoveTagsView, SelectView, NavigateDirectoryView } from '../wailsjs/go/main/WApp.js'
+  import { AddDirectoryView, RemoveDirectoryView, AddTagsView, RemoveTagsView, SelectView, NavigateDirectoryView, SelectViewFiles } from '../wailsjs/go/main/WApp.js'
   import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
   import { lib } from '../wailsjs/go/models'
   import * as Dialog from '../wailsjs/go/main/Dialog'
@@ -186,6 +186,9 @@
     subs.push(actionPublisher.subscribe('view-select', async({message}) => {
       SelectView(message)
     }))
+    subs.push(actionPublisher.subscribe('view-select-files', async({message}) => {
+      await SelectViewFiles(message.uuid, message.selected)
+    }))
 
     async function refresh() {
       undoable = await Undoable()
@@ -321,6 +324,19 @@
     }, -1)
     EventsOnMultiple('view-select', async (data: any) => {
       selectedView = data.UUID
+    }, -1)
+    EventsOnMultiple('view-select-files', async (data: any) => {
+      let d = directoryViews.find(v=>v.uuid === data.UUID)
+      if (d) {
+        d.selected = data.Selected
+        directoryViews = [...directoryViews]
+        return
+      }
+      let t = tagsViews.find(v=>v.uuid === data.UUID)
+      if (t) {
+        t.selected = data.Selected
+        tagsViews = [...tagsViews]
+      }
     }, -1)
 
     Ready()
