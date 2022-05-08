@@ -37,7 +37,7 @@
     if (e.shiftKey) {
       selectedFiles = [...new Set([...hits,...selectedFiles])]
     } else if (e.ctrlKey) {
-      selectedFiles = selectedFiles.filter(v=>hits.includes(v))
+      selectedFiles = selectedFiles.filter(v=>!hits.includes(v))
     } else {
       selectedFiles = hits
     }
@@ -79,7 +79,7 @@
       if (e.shiftKey) {
         selectedFiles = [...new Set([...hits,...selectedFiles])]
       } else if (e.ctrlKey) {
-        selectedFiles = selectedFiles.filter(v=>hits.includes(v))
+        selectedFiles = selectedFiles.filter(v=>!hits.includes(v))
       } else {
         selectedFiles = hits
       }
