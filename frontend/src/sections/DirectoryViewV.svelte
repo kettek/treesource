@@ -115,7 +115,7 @@
 
 <main bind:this={mainElement} on:mousedown={viewMousedown}>
   {#if view.wd != ""}
-    <li on:dblclick={async ()=>await travel("..")}>
+    <li on:click={async ()=>await travel("..")}>
       <div class="item folder">
         <span class='icon'>folder</span>
         <span class='title'>
@@ -125,7 +125,7 @@
     </li>
   {/if}
   {#each folders as [key, folder] (key)}
-    <li data-folder-id={key} on:dblclick={async ()=>await travel(key)}>
+    <li data-folder-id={key} on:click={async ()=>await travel(key)}>
       <div class="item folder">
         <span>folder</span>
         <span class='title'>
