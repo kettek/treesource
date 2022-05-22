@@ -38,6 +38,9 @@ type App struct {
 
 // NewApp creates a new App application struct
 func NewApp() *App {
+	mime.AddExtensionType(".yaml", "text/yaml")
+	mime.AddExtensionType(".yml", "text/yaml")
+	mime.AddExtensionType(".md", "text/markdown")
 	return &App{}
 }
 
