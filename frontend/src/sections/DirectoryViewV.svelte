@@ -40,12 +40,12 @@
     e.preventDefault()
     let b = mainElement.getBoundingClientRect()
     showBox = true
-    box[0] = box[2] = e.clientX - b.left
-    box[1] = box[3] = e.clientY - b.top
+    box[0] = box[2] = e.clientX - b.left + mainElement.scrollLeft
+    box[1] = box[3] = e.clientY - b.top + mainElement.scrollTop
     box = [...box]
     let viewMousemove = (e: MouseEvent) => {
-      box[2] = e.clientX - b.left
-      box[3] = e.clientY - b.top
+      box[2] = e.clientX - b.left + mainElement.scrollLeft
+      box[3] = e.clientY - b.top + mainElement.scrollTop
       box = [...box]
     }
     let viewMouseup = (e: MouseEvent) => {
@@ -54,8 +54,8 @@
       let hits = []
       for (let el of els) {
         let elb = el.getBoundingClientRect()
-        let x = elb.left - b.left
-        let y = elb.top - b.top
+        let x = elb.left - b.left + mainElement.scrollLeft
+        let y = elb.top - b.top + mainElement.scrollTop
         let isOverlapping = (x1min: number, x1max: number, x2min: number, x2max: number, y1min: number, y1max: number, y2min: number, y2max: number) => (x1min < x2max && x2min < x1max && y1min < y2max && y2min < y1max)
         // Check for constrain as well as contain
         if (isOverlapping(x, x+elb.width, boxRepresentation[0], boxRepresentation[2], y, y+elb.height, boxRepresentation[1], boxRepresentation[3])) {
@@ -81,8 +81,8 @@
         let attr = el.getAttribute('data-file-id')
         if (!selectedFiles.includes(attr)) continue
         let elb = el.getBoundingClientRect()
-        let x = elb.left - b.left
-        let y = elb.top - b.top
+        let x = elb.left - b.left + mainElement.scrollLeft
+        let y = elb.top - b.top + mainElement.scrollTop
         let x1 = x + elb.width/2
         let y1 = y + elb.height/2
         let d = Math.sqrt(Math.pow(box[2]-x1, 2)+Math.pow(box[3]-y1, 2))
