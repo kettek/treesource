@@ -7,12 +7,14 @@
 
   export let paths: string[]
   let icon: lib.Icon = null
+  let error: Error
 
   onMount(async () => {
-    icon = await getIcon(paths, { MaxWidth: 256, MaxHeight: 256, Method: "ApproxBiLinear" })
-
-    return () => {
-
+    try {
+      icon = await getIcon(paths, { MaxWidth: 256, MaxHeight: 256, Method: "ApproxBiLinear" })
+    } catch(e) {
+      error = e
+      console.log(e)
     }
   })
 </script>
@@ -23,6 +25,8 @@
   {:else}
     <span>DUNNO</span>
   {/if}
+{:else if error}
+  <span>FAIL</span>
 {:else}
   <Throbber/>
 {/if}

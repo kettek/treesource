@@ -192,7 +192,7 @@
   }
   .icon {
     width: 80%;
-    height: 80%;
+    height: 65%;
     display: flex;
     align-items: center;
     justify-content: center;
