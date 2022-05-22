@@ -2,8 +2,10 @@ package lib
 
 import (
 	"context"
+	"mime"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"treesource/internal/do"
 
@@ -218,4 +220,28 @@ func (a *App) CloseProjectFile(force bool) error {
 	a.Project = nil
 
 	return nil
+}
+
+// QueryFile queries a given file, returning stats for it if it exists.
+func (a *App) QueryFile(root string, path string) (FileInfo, error) {
+	p := filepath.Join(root, path)
+	info, err := os.Stat(p)
+	if err != nil {
+		return FileInfo{}, err
+	}
+	return FileInfo{
+		Name:        info.Name(),
+		Path:        p,
+		Size:        info.Size(),
+		Mode:        uint32(info.Mode()),
+		Permissions: info.Mode().Perm().String(),
+		Type:        info.Mode().Type().String(),
+		Special:     !info.Mode().Perm().IsRegular(),
+		ModTime:     info.ModTime(),
+		Mimetype:    mime.TypeByExtension(filepath.Ext(path)),
+	}, err
+}
+
+func (a *App) ReadFile(path string) ([]byte, error) {
+	return os.ReadFile(path)
 }

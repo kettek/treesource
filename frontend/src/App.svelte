@@ -14,6 +14,7 @@
   import * as ftt from '@kettek/filepaths-to-tree'
   import { DirectoryView, TagsView } from './models/views'
   import Views from './sections/Views.svelte'
+import FilePreview from './sections/FilePreview.svelte'
 
   let path: string
 
@@ -372,10 +373,7 @@
         </SplitPane>
       </section>
       <section slot=b class='view__info'>
-        <SplitPane type="vertical" pos=40>
-          <div slot=a class='view__info__preview'>preview</div>
-          <div slot=b class='view__info__data'>metadata</div>
-        </SplitPane>
+        <FilePreview selectedView={selectedView} directories={directories} directoryViews={directoryViews} tagsViews={tagsViews}></FilePreview>
       </section>
     </SplitPane>
   </section>
@@ -417,6 +415,5 @@
   section.view__info {
     display: grid;
     grid-template-rows: minmax(0, 1fr);
-    border: 1px solid yellow;
   }
 </style>
