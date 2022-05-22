@@ -17,9 +17,16 @@ import (
 	"golang.org/x/image/draw"
 	"gopkg.in/yaml.v3"
 
+	"image/png"
+
+	// image decoders
 	_ "image/gif"
 	_ "image/jpeg"
-	"image/png"
+
+	// extended image decoders
+	_ "golang.org/x/image/bmp"
+	_ "golang.org/x/image/tiff"
+	_ "golang.org/x/image/webp"
 )
 
 // App struct
@@ -268,18 +275,18 @@ func (a *App) GenerateIcon(paths []string, opts IconOptions) (Icon, error) {
 		return Icon{}, err
 	}
 
-	var w, h float64
+	var w, h int
 
 	if img.Bounds().Dx() <= opts.MaxWidth && img.Bounds().Dy() <= opts.MaxHeight {
-		w = float64(img.Bounds().Dx())
-		h = float64(img.Bounds().Dy())
+		w = img.Bounds().Dx()
+		h = img.Bounds().Dy()
 	} else {
 		ratio := math.Min(float64(opts.MaxWidth)/float64(img.Bounds().Dx()), float64(opts.MaxHeight)/float64(img.Bounds().Dy()))
-		w = float64(img.Bounds().Dx()) * ratio
-		h = float64(img.Bounds().Dy()) * ratio
+		w = int(math.Round(float64(img.Bounds().Dx()) * ratio))
+		h = int(math.Round(float64(img.Bounds().Dy()) * ratio))
 	}
 
-	dst := image.NewRGBA(image.Rect(0, 0, int(w), int(h)))
+	dst := image.NewRGBA(image.Rect(0, 0, w, h))
 	if opts.Method == "CatmullRom" {
 		draw.CatmullRom.Scale(dst, dst.Bounds(), img, img.Bounds(), draw.Over, nil)
 	} else if opts.Method == "NearestNeighbor" {
