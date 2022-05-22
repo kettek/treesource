@@ -260,22 +260,26 @@ func (s *Session) SelectView(u uuid.UUID) {
 	s.PendingSave()
 }
 
-func (s *Session) SelectViewFiles(u uuid.UUID, files []string) {
+func (s *Session) SelectViewFiles(u uuid.UUID, files []string, file string) {
 	d, err := s.GetDirectoryView(u)
 	if err == nil {
 		d.Selected = files
+		d.Focused = file
 		s.Emit(EventViewSelectFiles, &ViewSelectFilesEvent{
 			UUID:     u,
 			Selected: files,
+			Focused:  file,
 		})
 		return
 	}
 	t, err := s.GetTagsView(u)
 	if err == nil {
 		t.Selected = files
+		t.Focused = file
 		s.Emit(EventViewSelectFiles, &ViewSelectFilesEvent{
 			UUID:     u,
 			Selected: files,
+			Focused:  file,
 		})
 		return
 	}

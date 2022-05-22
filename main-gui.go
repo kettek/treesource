@@ -258,6 +258,6 @@ func (w *WApp) SelectView(u uuid.UUID) {
 	w.Session.SelectView(u)
 }
 
-func (w *WApp) SelectViewFiles(u uuid.UUID, files []string) {
-	w.Session.SelectViewFiles(u, files)
+func (w *WApp) SelectViewFiles(u uuid.UUID, files []string, file string) {
+	w.Session.SelectViewFiles(u, files, file)
 }

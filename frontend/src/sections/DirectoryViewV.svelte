@@ -9,6 +9,7 @@
   export let tree: Object
 
   $: selectedFiles = view.selected
+  $: focusedFile = view.focused
 
   let showBox: boolean = false
   let box: [number, number, number, number] = [0,0,0,0]
@@ -36,14 +37,20 @@
     let hits = [d.Path]
     if (e.shiftKey) {
       selectedFiles = [...new Set([...hits,...selectedFiles])]
+      focusedFile = hits[hits.length-1]
     } else if (e.ctrlKey) {
       selectedFiles = selectedFiles.filter(v=>!hits.includes(v))
+      if (!selectedFiles.includes(focusedFile)) {
+        focusedFile = selectedFiles[selectedFiles.length-1]
+      }
     } else {
       selectedFiles = hits
+      focusedFile = hits[hits.length-1]
     }
     actionPublisher.publish('view-select-files', {
       uuid: view.uuid,
       selected: selectedFiles,
+      focused: focusedFile,
     })
   }
 
@@ -78,15 +85,21 @@
       // TODO: Shift to add to selection, Control to remove
       if (e.shiftKey) {
         selectedFiles = [...new Set([...hits,...selectedFiles])]
+        focusedFile = hits[hits.length-1]
       } else if (e.ctrlKey) {
         selectedFiles = selectedFiles.filter(v=>!hits.includes(v))
+        if (!selectedFiles.includes(focusedFile)) {
+          focusedFile = selectedFiles[selectedFiles.length-1]
+        }
       } else {
         selectedFiles = hits
+        focusedFile = hits[hits.length-1]
       }
 
       actionPublisher.publish('view-select-files', {
         uuid: view.uuid,
         selected: selectedFiles,
+        focused: focusedFile,
       })
 
       showBox = false
@@ -120,7 +133,7 @@
     </li>
   {/each}
   {#each files as [key, file] }
-    <li data-file-id={key} class:selected={selectedFiles.includes(key)}>
+    <li data-file-id={key} class:selected={selectedFiles.includes(key)} class:focused={key===focusedFile}>
       <div on:mousedown|stopPropagation={e=>fileMousedown(e, file)} class="item file">
         <span class='icon'>file</span>
         <span class='title'>
@@ -147,9 +160,13 @@
   li {
     list-style: none;
     padding: .5em;
+    border: 1px solid transparent;
   }
   li.selected .title {
     background: var(--primary-light);
+  }
+  li.focused .title {
+    border: 1px solid var(--secondary-light);
   }
   .item {
     display: inline-flex;

@@ -187,7 +187,7 @@
       SelectView(message)
     }))
     subs.push(actionPublisher.subscribe('view-select-files', async({message}) => {
-      await SelectViewFiles(message.uuid, message.selected)
+      await SelectViewFiles(message.uuid, message.selected, message.focused)
     }))
 
     async function refresh() {
@@ -329,12 +329,14 @@
       let d = directoryViews.find(v=>v.uuid === data.UUID)
       if (d) {
         d.selected = data.Selected
+        d.focused = data.Focused
         directoryViews = [...directoryViews]
         return
       }
       let t = tagsViews.find(v=>v.uuid === data.UUID)
       if (t) {
         t.selected = data.Selected
+        d.focused = data.Focused
         tagsViews = [...tagsViews]
       }
     }, -1)

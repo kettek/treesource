@@ -102,6 +102,7 @@ const EventViewSelectFiles = "view-select-files"
 type ViewSelectFilesEvent struct {
 	UUID     uuid.UUID
 	Selected []string
+	Focused  string
 }
 
 const EventViewTagsAdd string = "view-tags-add"
