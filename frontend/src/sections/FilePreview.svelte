@@ -40,53 +40,48 @@
 
 <main>
   {#if focusedEntry}
-    <SplitPane type="vertical" pos={40}>
-      <section class='preview__information' slot=a>
-        {#await QueryFile(directory.Path, focusedEntry.Path)}
-          <Throbber/>
-        {:then fileInfo}
-          <section class='preview'>
-            {#if fileInfo.Mimetype.startsWith('image')}
-              {#await readFile(fileInfo.Path)}
-                <Throbber/>
-              {:then data}
-                <img src="data:{fileInfo.Mimetype};base64,{data}" alt={fileInfo.Name}>
-              {:catch err}
-                <span>ERROR: {err}</span>
-              {/await}
-            {:else if fileInfo.Mimetype.startsWith('text')}
-              <span>text</span>
-            {:else if fileInfo.Mimetype.startsWith('audio')}
-              {#await readFile(fileInfo.Path)}
-                <Throbber/>
-              {:then data}
-                <AudioPlayer autoplay src="data:{fileInfo.Mimetype};base64,{data}"/>
-              {:catch err}
-                <span>ERROR: {err}</span>
-              {/await}
-            {/if}
-          </section>
-          <section class='info'>
-            <li class='path'>
-              <label>{fileInfo.Name}</label>
-            </li>
-            <li class='type'>
-              <label for='fileInfo__Type'>type</label>
-              <input id='fileInfo__Type' type="text" disabled value={fileInfo.Mimetype}>
-            </li>
-            <li class='permissions'>
-              <label for='fileInfo__Permissions'>permissions</label>
-              <input id='fileInfo__Permissions' type="text" disabled value={fileInfo.Permissions}>
-            </li>
-          </section>
-        {:catch error}
-          <span>ERROR: {error}</span>
-        {/await}
-      </section>
-      <section slot=b>
-        META
-      </section>
-    </SplitPane>
+    <section class='preview__information'>
+      {#await QueryFile(directory.Path, focusedEntry.Path)}
+        <Throbber/>
+      {:then fileInfo}
+        <section class='preview'>
+          {#if fileInfo.Mimetype.startsWith('image')}
+            {#await readFile(fileInfo.Path)}
+              <Throbber/>
+            {:then data}
+              <img src="data:{fileInfo.Mimetype};base64,{data}" alt={fileInfo.Name}>
+            {:catch err}
+              <span>ERROR: {err}</span>
+            {/await}
+          {:else if fileInfo.Mimetype.startsWith('text')}
+            <span>text</span>
+          {:else if fileInfo.Mimetype.startsWith('audio')}
+            {#await readFile(fileInfo.Path)}
+              <Throbber/>
+            {:then data}
+              <AudioPlayer autoplay src="data:{fileInfo.Mimetype};base64,{data}"/>
+            {:catch err}
+              <span>ERROR: {err}</span>
+            {/await}
+          {/if}
+        </section>
+        <section class='info'>
+          <li class='path'>
+            <label>{fileInfo.Name}</label>
+          </li>
+          <li class='type'>
+            <label for='fileInfo__Type'>type</label>
+            <input id='fileInfo__Type' type="text" disabled value={fileInfo.Mimetype}>
+          </li>
+          <li class='permissions'>
+            <label for='fileInfo__Permissions'>permissions</label>
+            <input id='fileInfo__Permissions' type="text" disabled value={fileInfo.Permissions}>
+          </li>
+        </section>
+      {:catch error}
+        <span>ERROR: {error}</span>
+      {/await}
+    </section>
   {/if}
 </main>
 

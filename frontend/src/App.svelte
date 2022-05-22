@@ -15,6 +15,7 @@
   import { DirectoryView, TagsView } from './models/views'
   import Views from './sections/Views.svelte'
 import FilePreview from './sections/FilePreview.svelte'
+import FileMetadata from './sections/FileMetadata.svelte'
 
   let path: string
 
@@ -373,7 +374,10 @@ import FilePreview from './sections/FilePreview.svelte'
         </SplitPane>
       </section>
       <section slot=b class='view__info'>
-        <FilePreview selectedView={selectedView} directories={directories} directoryViews={directoryViews} tagsViews={tagsViews}></FilePreview>
+        <SplitPane type='vertical' pos={40}>
+          <FilePreview slot=a selectedView={selectedView} directories={directories} directoryViews={directoryViews} tagsViews={tagsViews}></FilePreview>
+          <FileMetadata slot=b selectedView={selectedView} directories={directories} directoryViews={directoryViews} tagsViews={tagsViews}></FileMetadata>
+        </SplitPane>
       </section>
     </SplitPane>
   </section>
