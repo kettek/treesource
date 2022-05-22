@@ -96,6 +96,22 @@
         selectedFiles = hits
         focusedFile = hits[hits.length-1]
       }
+      // Find our closest file to our mouse coordinate to use for focus.
+      let closest = 99999
+      for (let el of els) {
+        let attr = el.getAttribute('data-file-id')
+        if (!selectedFiles.includes(attr)) continue
+        let elb = el.getBoundingClientRect()
+        let x = elb.left - b.left
+        let y = elb.top - b.top
+        let x1 = x + elb.width/2
+        let y1 = y + elb.height/2
+        let d = Math.sqrt(Math.pow(box[2]-x1, 2)+Math.pow(box[3]-y1, 2))
+        if (d < closest) {
+          closest = d
+          focusedFile = attr
+        }
+      }
 
       actionPublisher.publish('view-select-files', {
         uuid: view.uuid,
