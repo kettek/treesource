@@ -70,7 +70,6 @@
       box = [...box]
     }
     let viewMouseup = (e: MouseEvent) => {
-      console.log('checnagek')
       let nodes = mainElement.getElementsByTagName('LI')
       let els = Array.from(nodes).filter(v=>v.getAttribute('data-file-id'))
       let hits = []
