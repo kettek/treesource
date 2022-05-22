@@ -34,27 +34,6 @@
     })
   }
 
-  async function fileMousedown(e: MouseEvent, d: lib.DirectoryEntry) {
-    let hits = [d.Path]
-    if (e.shiftKey) {
-      selectedFiles = [...new Set([...hits,...selectedFiles])]
-      focusedFile = hits[hits.length-1]
-    } else if (e.ctrlKey) {
-      selectedFiles = selectedFiles.filter(v=>!hits.includes(v))
-      if (!selectedFiles.includes(focusedFile)) {
-        focusedFile = selectedFiles[selectedFiles.length-1]
-      }
-    } else {
-      selectedFiles = hits
-      focusedFile = hits[hits.length-1]
-    }
-    actionPublisher.publish('view-select-files', {
-      uuid: view.uuid,
-      selected: selectedFiles,
-      focused: focusedFile,
-    })
-  }
-
   function viewMousedown(e: MouseEvent) {
     if (e.button !== 0) return
     e.stopPropagation()
@@ -151,7 +130,7 @@
   {/each}
   {#each files as [key, file] (key)}
     <li data-file-id={key} class:selected={selectedFiles.includes(key)} class:focused={key===focusedFile}>
-      <div on:mousedown|stopPropagation={e=>fileMousedown(e, file)} class="item file">
+      <div class="item file">
         <span class='icon'>
           <FileIcon paths={[directory.Path, file.Path]}/>
         </span>
