@@ -39,8 +39,8 @@
 
 <main>
   {#if focusedEntry}
-    <SplitPane type="vertical" pos=40>
-      <section slot=a>
+    <SplitPane type="vertical" pos={40}>
+      <section class='preview__information' slot=a>
         {#await QueryFile(directory.Path, focusedEntry.Path)}
           <Throbber/>
         {:then fileInfo}
@@ -88,10 +88,15 @@
     grid-template-rows: minmax(0, 1fr);
     padding: .5em;
   }
+  section.preview__information {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
   section.preview {
     background: black;
     color: white;
-    height: 70%;
+    height: 100%;
     border-radius: .25em;
   }
   section.preview img {
@@ -114,6 +119,7 @@
   }
   li.path > label {
     text-align: center;
+    word-wrap: break-word;
   }
   li > label {
     font-weight: bold;
