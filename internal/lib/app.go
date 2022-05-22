@@ -261,6 +261,7 @@ func (a *App) GenerateIcon(paths []string, opts IconOptions) (Icon, error) {
 	if err != nil {
 		return Icon{}, err
 	}
+	defer f.Close()
 
 	img, format, err := image.Decode(f)
 	if err != nil {
