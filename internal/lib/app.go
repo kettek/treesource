@@ -1,7 +1,11 @@
 package lib
 
 import (
+	"bufio"
+	"bytes"
 	"context"
+	"image"
+	"math"
 	"mime"
 	"os"
 	"path"
@@ -10,7 +14,12 @@ import (
 	"treesource/internal/do"
 
 	"github.com/google/uuid"
+	"golang.org/x/image/draw"
 	"gopkg.in/yaml.v3"
+
+	_ "image/gif"
+	_ "image/jpeg"
+	"image/png"
 )
 
 // App struct
@@ -244,4 +253,48 @@ func (a *App) QueryFile(root string, path string) (FileInfo, error) {
 
 func (a *App) ReadFile(path string) ([]byte, error) {
 	return os.ReadFile(path)
+}
+
+func (a *App) GenerateIcon(paths []string, opts IconOptions) (Icon, error) {
+	path := filepath.Join(paths...)
+	f, err := os.OpenFile(path, os.O_RDONLY, 0)
+	if err != nil {
+		return Icon{}, err
+	}
+
+	img, format, err := image.Decode(f)
+	if err != nil {
+		return Icon{}, err
+	}
+
+	var w, h float64
+
+	if img.Bounds().Dx() <= opts.MaxWidth && img.Bounds().Dy() <= opts.MaxHeight {
+		w = float64(img.Bounds().Dx())
+		h = float64(img.Bounds().Dy())
+	} else {
+		ratio := math.Min(float64(opts.MaxWidth)/float64(img.Bounds().Dx()), float64(opts.MaxHeight)/float64(img.Bounds().Dy()))
+		w = float64(img.Bounds().Dx()) * ratio
+		h = float64(img.Bounds().Dy()) * ratio
+	}
+
+	dst := image.NewRGBA(image.Rect(0, 0, int(w), int(h)))
+	if opts.Method == "CatmullRom" {
+		draw.CatmullRom.Scale(dst, dst.Bounds(), img, img.Bounds(), draw.Over, nil)
+	} else if opts.Method == "NearestNeighbor" {
+		draw.NearestNeighbor.Scale(dst, dst.Bounds(), img, img.Bounds(), draw.Over, nil)
+		//} else if opts.Method == "ApproxBiLinear" {
+	} else {
+		draw.ApproxBiLinear.Scale(dst, dst.Bounds(), img, img.Bounds(), draw.Over, nil)
+	}
+
+	var b bytes.Buffer
+	o := bufio.NewWriter(&b)
+	if err := png.Encode(o, dst); err != nil {
+		return Icon{}, err
+	}
+	return Icon{
+		Bytes:  b.Bytes(),
+		Format: format,
+	}, nil
 }

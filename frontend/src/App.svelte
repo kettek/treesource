@@ -386,7 +386,7 @@ import FilePreview from './sections/FilePreview.svelte'
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     grid-template-columns: minmax(0, 1fr);
-    background: var(--neutral-dark);
+    background: var(--secondary-dark);
     color: var(--primary-text);
   }
   section.menu {
@@ -410,7 +410,7 @@ import FilePreview from './sections/FilePreview.svelte'
   section.view__view {
     display: grid;
     grid-template-rows: minmax(0, 1fr) auto;
-    background: var(--secondary-dark);
+    background: var(--neutral-dark);
   }
   section.view__info {
     display: grid;

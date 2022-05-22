@@ -1,4 +1,5 @@
 <script lang='ts'>
+  import FileIcon from '../components/FileIcon.svelte'
   import { lib } from '../../wailsjs/go/models'
   import { actionPublisher } from '../actions'
 
@@ -69,6 +70,7 @@
       box = [...box]
     }
     let viewMouseup = (e: MouseEvent) => {
+      console.log('checnagek')
       let nodes = mainElement.getElementsByTagName('LI')
       let els = Array.from(nodes).filter(v=>v.getAttribute('data-file-id'))
       let hits = []
@@ -122,7 +124,7 @@
       </div>
     </li>
   {/if}
-  {#each folders as [key, folder] }
+  {#each folders as [key, folder] (key)}
     <li data-folder-id={key} on:dblclick={async ()=>await travel(key)}>
       <div class="item folder">
         <span>folder</span>
@@ -132,10 +134,12 @@
       </div>
     </li>
   {/each}
-  {#each files as [key, file] }
+  {#each files as [key, file] (key)}
     <li data-file-id={key} class:selected={selectedFiles.includes(key)} class:focused={key===focusedFile}>
       <div on:mousedown|stopPropagation={e=>fileMousedown(e, file)} class="item file">
-        <span class='icon'>file</span>
+        <span class='icon'>
+          <FileIcon paths={[directory.Path, file.Path]}/>
+        </span>
         <span class='title'>
           {key}
         </span>
@@ -159,7 +163,9 @@
   }
   li {
     list-style: none;
-    padding: .5em;
+    border: 1px solid transparent;
+  }
+  li .title {
     border: 1px solid transparent;
   }
   li.selected .title {
@@ -170,11 +176,11 @@
   }
   .item {
     display: inline-flex;
-    width: 6em;
-    height: 6em;
-    padding: .5em;
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 8em;
+    height: 12em;
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
@@ -185,12 +191,16 @@
   .item.file {
   }
   .icon {
-    width: 2em;
-    height: 2em;
+    width: 80%;
+    height: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .title {
     overflow: hidden;
     text-overflow: ellipsis;
+    word-break: break-all;
   }
   .box {
     position: absolute;
