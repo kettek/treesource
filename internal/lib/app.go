@@ -262,6 +262,23 @@ func (a *App) ReadFile(path string) ([]byte, error) {
 	return os.ReadFile(path)
 }
 
+func (a *App) PeekFile(path string, length int) ([]byte, error) {
+	f, err := os.OpenFile(path, os.O_RDONLY, 0)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	bytes := make([]byte, length)
+
+	_, err = f.Read(bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
+}
+
 func (a *App) GenerateIcon(paths []string, opts IconOptions) (Icon, error) {
 	path := filepath.Join(paths...)
 	f, err := os.OpenFile(path, os.O_RDONLY, 0)

@@ -2,7 +2,7 @@
   import SplitPane from '../components/SplitPane.svelte'
 
   import { onMount } from 'svelte'
-  import { QueryFile, ReadFile } from '../../wailsjs/go/main/WApp'
+  import { PeekFile, QueryFile, ReadFile } from '../../wailsjs/go/main/WApp'
 
   import { lib } from '../../wailsjs/go/models'
   import type { DirectoryView, TagsView } from '../models/views'
@@ -17,6 +17,7 @@
   export let selectedView: string | number[]  = ''
 
   let fileCache: {[key: string]: string} = {}
+  let peekCache: {[key: string]: string} = {}
 
   $: directoryView = directoryViews.find(v=>v.uuid===selectedView)
   $: directory = directoryView ? directories.find(v => v.UUID === directoryView.directory) : undefined
@@ -32,6 +33,15 @@
     let bytes = (await ReadFile(name)) as unknown as string
     fileCache[name] = bytes
     return fileCache[name]
+  }
+
+  async function peekFile(name: string): Promise<string> {
+    if (peekCache[name]) {
+      return peekCache[name]
+    }
+    let bytes = (await PeekFile(name, 200)) as unknown as string
+    peekCache[name] = atob(bytes)
+    return peekCache[name]
   }
 
   onMount(() => {
@@ -54,7 +64,13 @@
               <span>ERROR: {err}</span>
             {/await}
           {:else if fileInfo.Mimetype.startsWith('text')}
-            <span>text</span>
+            {#await peekFile(fileInfo.Path)}
+              <Throbber/>
+            {:then data}
+              <pre>{data}</pre>
+            {:catch err}
+              <span>ERROR: {err}</span>
+            {/await}
           {:else if fileInfo.Mimetype.startsWith('audio')}
             {#await readFile(fileInfo.Path)}
               <Throbber/>
@@ -102,11 +118,19 @@
     color: white;
     height: 100%;
     border-radius: .25em;
+    overflow: hidden;
   }
   section.preview img {
     max-width: 100%;
     height: auto;
     max-height: 100%;
+  }
+  section.preview pre {
+    max-width: 100%;
+    max-height: 100%;
+    text-align: left;
+    word-wrap: break-word;
+    white-space: pre-wrap;
   }
   li {
     list-style: none;
