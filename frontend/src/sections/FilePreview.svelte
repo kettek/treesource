@@ -7,6 +7,7 @@
   import { lib } from '../../wailsjs/go/models'
   import type { DirectoryView, TagsView } from '../models/views'
   import Throbber from '../components/Throbber.svelte'
+  import AudioPlayer from '../components/AudioPlayer.svelte'
 
   export let directories: lib.Directory[] = []
 
@@ -55,6 +56,14 @@
               {/await}
             {:else if fileInfo.Mimetype.startsWith('text')}
               <span>text</span>
+            {:else if fileInfo.Mimetype.startsWith('audio')}
+              {#await readFile(fileInfo.Path)}
+                <Throbber/>
+              {:then data}
+                <AudioPlayer autoplay src="data:{fileInfo.Mimetype};base64,{data}"/>
+              {:catch err}
+                <span>ERROR: {err}</span>
+              {/await}
             {/if}
           </section>
           <section class='info'>
@@ -130,5 +139,8 @@
     width: 100%;
     background: transparent;
     border: none;
+  }
+  audio {
+
   }
 </style>
