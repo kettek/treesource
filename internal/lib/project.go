@@ -2,6 +2,7 @@ package lib
 
 import (
 	"fmt"
+	"os"
 	"treesource/internal/do"
 
 	"github.com/google/uuid"
@@ -62,6 +63,7 @@ func (p *Project) AddDirectory(name string, ignoreDot bool) error {
 		IgnoreDot:  ignoreDot,
 		SyncOnLoad: true,
 		Emitter:    *NewEmitter(),
+		Separator:  string(os.PathSeparator),
 	}
 
 	/*err := p.InitDirectory(&d)
@@ -86,6 +88,8 @@ func (p *Project) InitDirectory(d *Directory) error {
 	d.On("add", p.EntryAddCallback)
 	d.On("found", p.EntryFoundCallback)
 	d.On("missing", p.EntryMissingCallback)
+
+	d.Separator = string(os.PathSeparator)
 
 	if d.SyncOnLoad {
 		err := d.SyncEntries()

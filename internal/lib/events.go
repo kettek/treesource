@@ -24,8 +24,11 @@ type DirectoryEvent struct {
 const EventDirectoryAdd string = "directory-add"
 
 type DirectoryAddEvent struct {
-	UUID uuid.UUID
-	Path string
+	UUID       uuid.UUID
+	Path       string
+	Separator  string
+	IgnoreDot  bool
+	SyncOnLoad bool
 }
 
 const EventDirectoryRemove string = "directory-remove"

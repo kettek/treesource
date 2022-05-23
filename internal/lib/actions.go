@@ -21,8 +21,11 @@ func (a *AddDirectoryAction) Apply(p *Project) {
 		p.Directories[a.Index] = *a.Directory.Clone()
 	}
 	p.Emit(EventDirectoryAdd, DirectoryAddEvent{
-		UUID: a.Directory.UUID,
-		Path: a.Directory.Path,
+		UUID:       a.Directory.UUID,
+		Path:       a.Directory.Path,
+		IgnoreDot:  a.Directory.IgnoreDot,
+		SyncOnLoad: a.Directory.SyncOnLoad,
+		Separator:  a.Directory.Separator,
 	})
 	// Need to rehook garbage.
 	p.InitDirectory(&p.Directories[a.Index])
@@ -69,8 +72,11 @@ func (a *RemoveDirectoryAction) Unapply(p *Project) {
 		p.Directories[a.Index] = *a.Directory.Clone()
 	}
 	p.Emit(EventDirectoryAdd, DirectoryAddEvent{
-		UUID: a.Directory.UUID,
-		Path: a.Directory.Path,
+		UUID:       a.Directory.UUID,
+		Path:       a.Directory.Path,
+		IgnoreDot:  a.Directory.IgnoreDot,
+		SyncOnLoad: a.Directory.SyncOnLoad,
+		Separator:  a.Directory.Separator,
 	})
 	// Need to rehook garbage.
 	p.InitDirectory(&p.Directories[a.Index])

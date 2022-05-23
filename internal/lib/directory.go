@@ -12,6 +12,7 @@ type Directory struct {
 	Emitter
 	UUID       uuid.UUID         `json:"UUID" yaml:"UUID"`
 	Path       string            `json:"Path" yaml:"Path"`
+	Separator  string            `json:"Separator" yaml:"-"`
 	Entries    []*DirectoryEntry `json:"Entries" yaml:"Entries"`
 	IgnoreDot  bool              `json:"IgnoreDot" yaml:"IgnoreDot"`
 	SyncOnLoad bool              `json:"SyncOnLoad" yaml:"SyncOnLoad"`
@@ -21,6 +22,7 @@ func (d *Directory) Clone() *Directory {
 	d2 := &Directory{}
 	d2.UUID = d.UUID
 	d2.Path = d.Path
+	d2.Separator = string(os.PathSeparator)
 	d2.IgnoreDot = d.IgnoreDot
 	d2.SyncOnLoad = d.SyncOnLoad
 	d2.Emitter = *NewEmitter()
