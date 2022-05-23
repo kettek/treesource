@@ -129,7 +129,7 @@
     </li>
   {/each}
   {#each files as [key, file] (key)}
-    <li data-file-id={key} class:selected={selectedFiles.includes(key)} class:focused={key===focusedFile}>
+    <li data-file-id={file.Path} class:selected={selectedFiles.includes(file.Path)} class:focused={file.Path===focusedFile}>
       <div class="item file">
         <span class='icon'>
           <FileIcon paths={[directory.Path, file.Path]}/>
