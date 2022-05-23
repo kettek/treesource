@@ -7,7 +7,6 @@
   let currentTime: number = 0
   let muted: boolean = false
   let paused: boolean = true
-  let volume: number = 0.5
 
   function scrobble(e: MouseEvent) {
     console.log(e)
@@ -23,7 +22,7 @@
     <div class='rail'></div>
     <div class='train' style="left: calc({currentTime/duration*100}% - .5em)"><!-- choo choo --></div>
   </div>
-  <audio autoplay={autoplay} src={src} bind:duration bind:currentTime bind:muted bind:paused bind:volume/>
+  <audio autoplay={autoplay} src={src} bind:duration bind:currentTime bind:muted bind:paused/>
 </main>
 
 <style>
