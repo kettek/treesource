@@ -3,6 +3,7 @@ package lib
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -201,6 +202,8 @@ func (s *Session) NavigateDirectoryView(u uuid.UUID, path string) error {
 		}
 	} else if path == "/" {
 		d.WD = ""
+	} else if strings.HasPrefix(path, "/") {
+		d.WD = path[1:]
 	} else {
 		d.WD = filepath.Join(d.WD, path)
 	}
