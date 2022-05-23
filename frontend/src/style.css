@@ -65,6 +65,7 @@ body {
     --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
     --primary-light: hsl(var(--primary-h), var(--primary-s), calc(var(--lighten) + var(--primary-l)));
     --primary-dark: hsl(var(--primary-h), var(--primary-s), calc(var(--primary-l) - var(--darken)));
+    --primary-darker: hsl(var(--primary-h), var(--primary-s), calc(var(--primary-l) - var(--darker)));
     --primary-text: hsl(var(--primary-h), var(--primary-s), var(--text));
     --secondary: hsl(var(--secondary-h), var(--secondary-s), var(--secondary-l));
     --secondary-light: hsl(var(--secondary-h), var(--secondary-s), calc(var(--lighten) + var(--secondary-l)));
