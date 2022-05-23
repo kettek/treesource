@@ -27,6 +27,10 @@
   $: folders = entries.filter(v=>!(v[1] instanceof lib.DirectoryEntry))
   $: files = entries.filter(v=>v[1] instanceof lib.DirectoryEntry)
 
+  $: crumbs = view.wd.split(directory.Separator).map((v, i, a) => {
+    return [v, a.slice(0, i+1).join(directory.Separator)]
+  })
+
   async function travel(to) {
     //let t = [view.wd, to].filter(v=>v!=='').join('/')
     actionPublisher.publish('view-directory-navigate', {
@@ -114,45 +118,97 @@
 </script>
 
 <main bind:this={mainElement} on:mousedown={viewMousedown}>
-  {#if view.wd != ""}
-    <li on:click={async ()=>await travel("..")}>
-      <div class="item folder">
-        <span class='icon'>folder</span>
-        <span class='title'>
-          ..
-        </span>
-      </div>
-    </li>
-  {/if}
-  {#each folders as [key, folder] (key)}
-    <li data-folder-id={key} on:click={async ()=>await travel(key)}>
-      <div class="item folder">
-        <span>folder</span>
-        <span class='title'>
-          {key}
-        </span>
-      </div>
-    </li>
-  {/each}
-  {#each files as [key, file] (key)}
-    <li data-file-id={file.Path} class:selected={selectedFiles.includes(file.Path)} class:focused={file.Path===focusedFile} on:dblclick={async ()=>await OpenFile([directory.Path, file.Path])}>
-      <div class="item file">
-        <span class='icon'>
-          <FileIcon paths={[directory.Path, file.Path]}/>
-        </span>
-        <span class='title'>
-          {key}
-        </span>
-      </div>
-    </li>
-  {/each}
-  {#if showBox}
-    <div class='box' style="left: {boxRepresentation[0]}px; top: {boxRepresentation[1]}px; width: {boxRepresentation[2]-boxRepresentation[0]}px; height: {boxRepresentation[3]-boxRepresentation[1]}px"></div>
-  {/if}
+  <nav>
+    {#if crumbs[0][0] !== ''}
+      <li on:click={async ()=>await travel("/")}></li>
+    {/if}
+    {#each crumbs as crumb}
+      <li class:focused={view.wd===crumb[1]} on:click={async ()=>await travel("/"+crumb[1])} title={crumb[1]}>{crumb[0]}</li>
+    {/each}
+  </nav>
+  <section>
+    {#if view.wd != ""}
+      <li on:click={async ()=>await travel("..")}>
+        <div class="item folder">
+          <span class='icon'>folder</span>
+          <span class='title'>
+            ..
+          </span>
+        </div>
+      </li>
+    {/if}
+    {#each folders as [key, folder] (key)}
+      <li data-folder-id={key} on:click={async ()=>await travel(key)}>
+        <div class="item folder">
+          <span>folder</span>
+          <span class='title'>
+            {key}
+          </span>
+        </div>
+      </li>
+    {/each}
+    {#each files as [key, file] (key)}
+      <li data-file-id={file.Path} class:selected={selectedFiles.includes(file.Path)} class:focused={file.Path===focusedFile} on:dblclick={async ()=>await OpenFile([directory.Path, file.Path])}>
+        <div class="item file">
+          <span class='icon'>
+            <FileIcon paths={[directory.Path, file.Path]}/>
+          </span>
+          <span class='title'>
+            {key}
+          </span>
+        </div>
+      </li>
+    {/each}
+    {#if showBox}
+      <div class='box' style="left: {boxRepresentation[0]}px; top: {boxRepresentation[1]}px; width: {boxRepresentation[2]-boxRepresentation[0]}px; height: {boxRepresentation[3]-boxRepresentation[1]}px"></div>
+    {/if}
+  </section>
 </main>
 
 <style>
   main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: hidden;
+  }
+  nav {
+    display: flex;
+    align-items: flex-start;
+  }
+  nav li {
+    position: relative;
+    display: block;
+    height: 1.5em;
+    background: var(--primary-darker);
+    padding-left: 1em;
+  }
+  nav li:after {
+    display: block;
+    content: ' ';
+    width: 0;
+    height: 0;
+    position: absolute;
+    bottom: 0;
+    left: 100%;
+    border-style: solid;
+    border-width: .75em 0em .75em 1em;
+    border-color: transparent transparent transparent var(--primary-darker);
+    z-index: 2;
+  }
+  nav li:nth-child(even) {
+    background: var(--primary-dark);
+  }
+  nav li:nth-child(even):after {
+    border-color: transparent transparent transparent var(--primary-dark);
+  }
+  nav li.focused {
+    background: var(--primary);
+  }
+  nav li.focused:after {
+    border-color: transparent transparent transparent var(--primary);
+  }
+  section {
     position: relative;
     display: flex;
     flex-wrap: wrap;
