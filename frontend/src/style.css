@@ -4,6 +4,22 @@ html {
     color: white;
 }
 
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--neutral-darker);
+    border-radius: 2px;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--neutral);
+    border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--neutral-light);
+}
+
 body {
     margin: 0;
     color: white;
@@ -42,6 +58,7 @@ body {
     /**/
     --lighten: 25%;
     --darken: 15%;
+    --darker: 20%;
     --text: 90%;
     /**/
     --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
@@ -55,5 +72,6 @@ body {
     --neutral: hsl(var(--neutral-h), var(--neutral-s), var(--neutral-l));
     --neutral-light: hsl(var(--neutral-h), var(--neutral-s), calc(var(--lighten) + var(--neutral-l)));
     --neutral-dark: hsl(var(--neutral-h), var(--neutral-s), calc(var(--neutral-l) - var(--darken)));
+    --neutral-darker: hsl(var(--neutral-h), var(--neutral-s), calc(var(--neutral-l) - var(--darker)));
     --neutral-text: hsl(var(--neutral-h), var(--neutral-s), var(--text));
 }
