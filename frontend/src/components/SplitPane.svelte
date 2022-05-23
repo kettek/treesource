@@ -115,7 +115,7 @@ The software is provided "as is", without warranty of any kind, including but no
 		content: '';
 		position: absolute;
 		/* background-color: #eee; */
-		background-color: var(--neutral-dark);
+		background-color: var(--neutral-darkest);
 	}
 
 	.horizontal {
