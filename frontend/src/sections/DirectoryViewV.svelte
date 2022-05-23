@@ -2,6 +2,7 @@
   import FileIcon from '../components/FileIcon.svelte'
   import { lib } from '../../wailsjs/go/models'
   import { actionPublisher } from '../actions'
+  import { OpenFile } from '../../wailsjs/go/main/WApp.js'
 
   import type { DirectoryView, TagsView } from '../models/views'
 
@@ -105,6 +106,11 @@
     window.addEventListener('mouseup', viewMouseup)
     window.addEventListener('mousemove', viewMousemove)
   }
+
+  function handleFileOpen(file: lib.DirectoryEntry) {
+
+  }
+
 </script>
 
 <main bind:this={mainElement} on:mousedown={viewMousedown}>
@@ -129,7 +135,7 @@
     </li>
   {/each}
   {#each files as [key, file] (key)}
-    <li data-file-id={file.Path} class:selected={selectedFiles.includes(file.Path)} class:focused={file.Path===focusedFile}>
+    <li data-file-id={file.Path} class:selected={selectedFiles.includes(file.Path)} class:focused={file.Path===focusedFile} on:dblclick={async ()=>await OpenFile([directory.Path, file.Path])}>
       <div class="item file">
         <span class='icon'>
           <FileIcon paths={[directory.Path, file.Path]}/>
