@@ -53,6 +53,7 @@
   }
   .train {
     position: absolute;
+    left: -.5em;
     top: 0em;
     width: 1em;
     height: 2em;
