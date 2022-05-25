@@ -45,6 +45,17 @@ func (d *Directory) Entry(name string) *DirectoryEntry {
 	return nil
 }
 
+// Remove removes an entry matching the given name and returns it and its index.
+func (d *Directory) Remove(name string) (*DirectoryEntry, int) {
+	for i, e := range d.Entries {
+		if e.Path == name {
+			d.Entries = append(d.Entries[:i], d.Entries[i+1:]...)
+			return e, i
+		}
+	}
+	return nil, -1
+}
+
 func (d *Directory) EmitAllEntries() {
 	for _, e := range d.Entries {
 		d.Emit("entry", &DirectoryEntryEvent{
@@ -139,8 +150,9 @@ func (d *Directory) SyncEntries() error {
 // DirectoryEntry represents an entry in a treesource directory.
 type DirectoryEntry struct {
 	// Path is relative to the owning Directory's path.
-	Path string   `json:"Path" yaml:"Path"`
-	Tags []string `json:"Tags,omitempty" yaml:"Tags,omitempty"`
+	Path   string   `json:"Path" yaml:"Path"`
+	Tags   []string `json:"Tags" yaml:"Tags,omitempty"`
+	Rating float64  `json:"Rating" yaml:"Rating,omitempty"`
 	// Missing represents if the entry is referring to a file that no longer exists.
 	Missing bool `json:"Missing,omitempty" yaml:"Missing,omitempty"`
 }
@@ -148,6 +160,14 @@ type DirectoryEntry struct {
 func (e *DirectoryEntry) Clone() (e2 DirectoryEntry) {
 	e2.Path = e.Path
 	copy(e2.Tags, e.Tags)
+	e2.Rating = e.Rating
 	e2.Missing = e.Missing
 	return
+}
+
+func (e *DirectoryEntry) Subsume(o DirectoryEntry) {
+	e.Path = o.Path
+	e.Tags = o.Tags
+	e.Rating = o.Rating
+	e.Missing = o.Missing
 }

@@ -134,6 +134,16 @@ func (a *App) RemoveProjectDirectory(uuid uuid.UUID) error {
 	return nil
 }
 
+func (a *App) UpdateProjectDirectoryEntry(uuid uuid.UUID, path string, entry DirectoryEntry) error {
+	if a.Project == nil {
+		return &NoProjectError{}
+	}
+	if err := a.Project.UpdateDirectoryEntry(uuid, path, entry); err != nil {
+		return err
+	}
+	return nil
+}
+
 // SaveProject saves the current project.
 func (a *App) SaveProject(force bool) error {
 	if a.Project == nil {

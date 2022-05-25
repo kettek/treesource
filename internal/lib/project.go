@@ -86,6 +86,8 @@ func (p *Project) InitDirectory(d *Directory) error {
 	d.On("synced", p.SyncedDirectoryCallback)
 	d.On("entry", p.EntryCallback)
 	d.On("add", p.EntryAddCallback)
+	d.On(EventDirectoryEntryRemove, p.EntryRemoveCallback)
+	d.On(EventDirectoryEntryUpdate, p.EntryUpdateCallback)
 	d.On("found", p.EntryFoundCallback)
 	d.On("missing", p.EntryMissingCallback)
 
@@ -124,6 +126,25 @@ func (p *Project) RemoveDirectoryByUUID(UUID uuid.UUID) error {
 	return &MissingDirectoryError{}
 }
 
+func (p *Project) UpdateDirectoryEntry(u uuid.UUID, path string, entry DirectoryEntry) error {
+	/*d, err := p.GetDirectoryByUUID(u)
+	if err != nil {
+		return err
+	}*/
+	fmt.Println("push and apply", u, path, entry)
+	p.history.PushAndApply(&UpdateEntryAction{
+		UUID:  u,
+		path:  path,
+		Entry: entry,
+	})
+
+	return nil
+	/*return &MissingEntryError{
+		path: path,
+		dir:  d.Path,
+	}*/
+}
+
 func (p *Project) SyncDirectory(name string) error {
 	for _, d := range p.Directories {
 		if d.Path == name {
@@ -158,6 +179,16 @@ func (p *Project) EntryCallback(e Event) {
 func (p *Project) EntryAddCallback(e Event) {
 	p.Changed()
 	p.Emit(EventDirectoryEntryAdd, e)
+}
+
+func (p *Project) EntryRemoveCallback(e Event) {
+	p.Changed()
+	p.Emit(EventDirectoryEntryRemove, e)
+}
+
+func (p *Project) EntryUpdateCallback(e Event) {
+	p.Changed()
+	p.Emit(EventDirectoryEntryUpdate, e)
 }
 
 func (p *Project) EntryMissingCallback(e Event) {

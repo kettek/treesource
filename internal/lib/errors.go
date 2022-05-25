@@ -27,6 +27,15 @@ func (e *MissingDirectoryError) Error() string {
 	return fmt.Sprintf("directory '%s' is missing", e.dir)
 }
 
+type MissingEntryError struct {
+	dir  string
+	path string
+}
+
+func (e *MissingEntryError) Error() string {
+	return fmt.Sprintf("entry '%s' in '%s' is missing", e.path, e.dir)
+}
+
 type MissingDirectoryViewError struct {
 	uuid uuid.UUID
 }

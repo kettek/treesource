@@ -191,6 +191,12 @@ func (w *WApp) InitProject() error {
 	w.Project.On("directory-entry-add", func(e lib.Event) {
 		runtime.EventsEmit(w.Context(), lib.EventDirectoryEntryAdd, e)
 	})
+	w.Project.On("directory-entry-remove", func(e lib.Event) {
+		runtime.EventsEmit(w.Context(), lib.EventDirectoryEntryRemove, e)
+	})
+	w.Project.On("directory-entry-update", func(e lib.Event) {
+		runtime.EventsEmit(w.Context(), lib.EventDirectoryEntryUpdate, e)
+	})
 	w.Project.On("directory-entry-missing", func(e lib.Event) {
 		runtime.EventsEmit(w.Context(), lib.EventDirectoryEntryMissing, e)
 	})
@@ -260,4 +266,8 @@ func (w *WApp) SelectView(u uuid.UUID) {
 
 func (w *WApp) SelectViewFiles(u uuid.UUID, files []string, file string) {
 	w.Session.SelectViewFiles(u, files, file)
+}
+
+func (w *WApp) UpdateEntry(u uuid.UUID, file string, entry lib.DirectoryEntry) error {
+	return w.Project.UpdateDirectoryEntry(u, file, entry)
 }

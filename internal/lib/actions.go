@@ -3,6 +3,8 @@ package lib
 import (
 	"fmt"
 	"treesource/internal/do"
+
+	"github.com/google/uuid"
 )
 
 // AddDirectoryAction adds the given directory at the provided index.
@@ -94,6 +96,90 @@ func (a *SyncDirectoryAction) Apply(p *Project) {
 
 func (a *SyncDirectoryAction) Unapply(p *Project) {
 	fmt.Println("action: unapply sync dir")
+}
+
+type UpdateEntryAction struct {
+	UUID     uuid.UUID
+	Entry    DirectoryEntry
+	path     string
+	previous DirectoryEntry
+}
+
+func (a *UpdateEntryAction) Apply(p *Project) {
+	dir, err := p.GetDirectoryByUUID(a.UUID)
+	if err != nil {
+		return
+	}
+	entry := dir.Entry(a.path)
+	if entry == nil {
+		return
+	}
+	a.previous = entry.Clone()
+	entry.Subsume(a.Entry)
+	dir.Emit(EventDirectoryEntryUpdate, DirectoryEntryUpdateEvent{
+		UUID:  a.UUID,
+		Entry: entry,
+	})
+}
+
+func (a *UpdateEntryAction) Unapply(p *Project) {
+	dir, err := p.GetDirectoryByUUID(a.UUID)
+	if err != nil {
+		return
+	}
+	entry := dir.Entry(a.Entry.Path)
+	if entry == nil {
+		return
+	}
+	entry.Subsume(a.previous)
+	dir.Emit(EventDirectoryEntryUpdate, DirectoryEntryUpdateEvent{
+		UUID:  a.UUID,
+		Entry: entry,
+	})
+}
+
+type RemoveEntryAction struct {
+	UUID     uuid.UUID
+	Path     string
+	index    int
+	previous *DirectoryEntry
+}
+
+func (a *RemoveEntryAction) Apply(p *Project) {
+	dir, err := p.GetDirectoryByUUID(a.UUID)
+	if err != nil {
+		return
+	}
+	entry, index := dir.Remove(a.Path)
+	if entry == nil {
+		return
+	}
+	a.previous = entry
+	a.index = index
+	dir.Emit(EventDirectoryEntryRemove, DirectoryEntryRemoveEvent{
+		UUID:  a.UUID,
+		Entry: a.previous,
+	})
+}
+
+func (a *RemoveEntryAction) Unapply(p *Project) {
+	dir, err := p.GetDirectoryByUUID(a.UUID)
+	if err != nil {
+		return
+	}
+	if a.previous == nil {
+		return
+	}
+	if len(dir.Entries) == a.index {
+		dir.Entries = append(dir.Entries, a.previous)
+	} else {
+		dir.Entries = append(dir.Entries[:a.index+1], dir.Entries[a.index:]...)
+		dir.Entries[a.index] = a.previous
+	}
+	dir.Emit(EventDirectoryEntryAdd, DirectoryEntryAddEvent{
+		UUID:  a.UUID,
+		Entry: a.previous,
+	})
 }
 
 // GroupedAction represents a collection of actions.

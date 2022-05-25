@@ -22,6 +22,14 @@
       tag: tag,
     })
   }
+
+  function setRating(value: number) {
+    actionPublisher.publish('entry-set-rating', {
+      uuid: directory?.UUID,
+      path: focusedEntry.Path,
+      entry: {...focusedEntry, Rating: value},
+    })
+  }
 </script>
 
 <main>
@@ -29,20 +37,24 @@
     <section>
       <header>rating</header>
       <article class='rating'>
-        * * * *
+        {#each [1, 2, 3, 4, 5] as rating}
+          <span class='rating__star' class:selected={rating<=focusedEntry.Rating} on:click={_=>setRating(rating)}>*</span>
+        {/each}
       </article>
     </section>
     <section>
       <header>tags</header>
       <article class='tags'>
-        {#each focusedEntry.Tags as tag}
-        <div class='tag'>
-          <div class='tag__name'>
-            {tag}
-          </div>
-          <div class='tag__remove' on:click={_=>removeTag(tag)}> x </div>
-        </div>
-        {/each}
+        {#if focusedEntry.Tags}
+          {#each focusedEntry.Tags as tag}
+            <div class='tag'>
+              <div class='tag__name'>
+                {tag}
+              </div>
+              <div class='tag__remove' on:click={_=>removeTag(tag)}> x </div>
+            </div>
+          {/each}
+        {/if}
       </article>
     </section>
   {/if}
@@ -81,5 +93,8 @@
   }
   .tag__remove {
     border-left: 1px solid gray;
+  }
+  .rating__star.selected {
+    color: yellow;
   }
 </style>

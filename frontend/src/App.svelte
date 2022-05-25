@@ -1,7 +1,7 @@
 <script lang="ts">
   import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
   import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
-  import { HasProject, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory, Ready, Undoable, Redoable, Undo, Redo, Unsaved, SaveProject } from '../wailsjs/go/main/WApp.js'
+  import { HasProject, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory, Ready, Undoable, Redoable, Undo, Redo, Unsaved, SaveProject, UpdateEntry } from '../wailsjs/go/main/WApp.js'
   import { AddDirectoryView, RemoveDirectoryView, AddTagsView, RemoveTagsView, SelectView, NavigateDirectoryView, SelectViewFiles } from '../wailsjs/go/main/WApp.js'
   import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
   import { lib } from '../wailsjs/go/models'
@@ -191,6 +191,10 @@ import FileMetadata from './sections/FileMetadata.svelte'
     subs.push(actionPublisher.subscribe('view-select-files', async({message}) => {
       await SelectViewFiles(message.uuid, message.selected, message.focused)
     }))
+    subs.push(actionPublisher.subscribe('entry-set-rating', async({message}) => {
+      console.log('entry-set-rating', message)
+      await UpdateEntry(message.uuid, message.path, message.entry)
+    }))
 
     async function refresh() {
       undoable = await Undoable()
@@ -285,6 +289,22 @@ import FileMetadata from './sections/FileMetadata.svelte'
       directories = [...directories]
       await refresh()*/
     }, -1)
+    EventsOnMultiple('directory-entry-update', async (data: any) => {
+      let d = directories.find(v=>v.UUID===data.UUID)
+      if (!d) return
+      let e = new lib.DirectoryEntry(data.Entry)
+      for (let i = 0; i < d.Entries.length; i++) {
+        if (d.Entries[i].Path === e.Path) {
+          d.Entries[i].Tags = e.Tags
+          d.Entries[i].Missing = e.Missing
+          d.Entries[i].Rating = e.Rating
+          break
+        }
+      }
+      directories = [...directories]
+      directoryTrees = {...directoryTrees}
+      await refresh()
+    }, -1)
     EventsOnMultiple('directory-entry-remove', async (data: any) => {
       console.log('entry-remove', data)
       ftt.Remove(directoryTrees[data.UUID], data.Entry.Path)
@@ -295,7 +315,7 @@ import FileMetadata from './sections/FileMetadata.svelte'
       await refresh()
     }, -1)
     EventsOnMultiple('directory-entry-found', async (data: any) => {
-      console.log('entry-found', data)
+      //console.log('entry-found', data)
       await refresh()
     }, -1)
     // View stuff

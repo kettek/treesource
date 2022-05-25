@@ -64,6 +64,20 @@ type DirectoryEntryAddEvent struct {
 	Entry *DirectoryEntry
 }
 
+const EventDirectoryEntryRemove string = "directory-entry-remove"
+
+type DirectoryEntryRemoveEvent struct {
+	UUID  uuid.UUID
+	Entry *DirectoryEntry
+}
+
+const EventDirectoryEntryUpdate string = "directory-entry-update"
+
+type DirectoryEntryUpdateEvent struct {
+	UUID  uuid.UUID
+	Entry *DirectoryEntry
+}
+
 const EventDirectoryEntryMissing string = "directory-entry-missing"
 
 type DirectoryEntryMissingEvent struct {
