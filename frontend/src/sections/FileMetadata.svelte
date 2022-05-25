@@ -38,7 +38,9 @@
       <header>rating</header>
       <article class='rating'>
         {#each [1, 2, 3, 4, 5] as rating}
-          <span class='rating__star' class:selected={rating<=focusedEntry.Rating} on:click={_=>setRating(rating)}>*</span>
+          <span class='rating__star' class:selected={rating<=focusedEntry.Rating} on:click={_=>setRating(rating)}>
+            {rating<=focusedEntry.Rating?'✦':'✧'}
+          </span>
         {/each}
       </article>
     </section>
@@ -93,6 +95,9 @@
   }
   .tag__remove {
     border-left: 1px solid gray;
+  }
+  .rating__star {
+    cursor: pointer;
   }
   .rating__star.selected {
     color: yellow;
