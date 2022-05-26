@@ -2,28 +2,25 @@
   import Menus from '../menu/Menus.svelte'
   import MenuBar from '../menu/MenuBar.svelte'
   import MenuItem from '../menu/MenuItem.svelte'
-  import type { lib } from '../../wailsjs/go/models'
-  import { actionPublisher } from '../actions'
+  import DirectoriesItem from './DirectoriesItem.svelte'
+
+  import { directories as directoriesStore } from '../stores/directories'
 
   export let disabled: boolean
-  export let directories: lib.Directory[] = []
   let selectedDirectoryIndex: number = 0
-  $: selectedDirectory = directories[selectedDirectoryIndex]
+  $: selectedDirectory = $directoriesStore.Directories[selectedDirectoryIndex]
 </script>
 
 <section>
   <Menus>
     <MenuBar>
       <MenuItem action='directory-add' disabled={disabled}>add</MenuItem>
-      <MenuItem action='directory-remove' args={selectedDirectory?.UUID} disabled={disabled||selectedDirectoryIndex<0||selectedDirectoryIndex>=directories.length}>remove selected</MenuItem>
+      <MenuItem action='directory-remove' args={$selectedDirectory?.RealDir?.UUID} disabled={disabled||selectedDirectoryIndex<0||selectedDirectoryIndex>=$directoriesStore.Directories.length}>remove selected</MenuItem>
     </MenuBar>
   </Menus>
   <ul>
-    {#each directories as directory, i}
-      <li class:selected={selectedDirectoryIndex===i} on:click={()=>selectedDirectoryIndex=i} on:dblclick={()=>actionPublisher.publish('view-directory-add', directory.UUID)}>
-        <span class='title'>{directory.Path}</span>
-        <span class='count'>{directory.Entries.length}</span>
-      </li>
+    {#each $directoriesStore.Directories as directory, i}
+      <DirectoriesItem selected={selectedDirectoryIndex===i} directory={directory} on:click={()=>selectedDirectoryIndex=i}/>
     {/each}
   </ul>
 </section>
@@ -44,22 +41,5 @@
     overflow-y: scroll;
     user-select: none;
     -webkit-user-select: none;
-  }
-  li {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    padding: .5em .5em;
-    overflow: auto;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    cursor: pointer;
-  }
-  li.selected {
-    background-color: var(--primary);
-  }
-  .count {
-    font-size: 60%;
   }
 </style>

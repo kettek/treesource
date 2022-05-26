@@ -443,7 +443,7 @@ import DirectoryViewV from './sections/DirectoryViewV.svelte';
         <SplitPane type="horizontal" pos=20>
           <section slot=a class='view__dirs'>
             <SplitPane type="vertical" pos=50>
-              <Directories slot=a disabled={!project} bind:directories={directories}></Directories>
+              <Directories slot=a disabled={!project}></Directories>
               <div slot=b class='view__dirs__tags'>
                 tags
               </div>

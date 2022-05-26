@@ -2,6 +2,7 @@ import type { DirectoryView } from '../models/views'
 import { writable, get, Subscriber, Writable } from 'svelte/store'
 import type { lib } from '../../wailsjs/go/models'
 import type Views from 'src/sections/Views.svelte'
+import { actionPublisher } from '../actions'
 
 interface DirectoryViewStore extends Writable<DirectoryView> {
   _setWorkingDir: (wd: string) => void
@@ -20,14 +21,12 @@ function createDirectoryViewStore(v: DirectoryView): DirectoryViewStore {
       let v = get({subscribe})
       v.wd = wd
       set(v)
-      console.log('set wd', wd)
     },
     _selectFiles: (focused: string, selected: string[]) => {
       let v = get({subscribe})
       v.focused = focused
       v.selected = selected
       set(v)
-      console.log('select', v)
     },
     select: (focused: string, selected: string[]) => {
       let v = get({subscribe})
@@ -76,13 +75,11 @@ export const views: ViewsStore = ((): ViewsStore => {
       if (vs.views.find(v=>get(v).uuid===d.uuid)) return
       vs.views.push(createDirectoryViewStore(d))
       set(vs)
-      console.log('add dv', d)
     },
     remove: (uuid: number[]|string) => {
       let vs = get({subscribe})
       vs.views = vs.views.filter(v=>get(v).uuid!==uuid)
       set(vs)
-      console.log('remvoe dv')
     },
     get: (uuid: number[]|string) => {
       let vs = get({subscribe})
@@ -91,7 +88,6 @@ export const views: ViewsStore = ((): ViewsStore => {
     select: (uuid: number[]|string) => {
       let vs = get({subscribe})
       vs.selected = vs.views.find(v=>get(v).uuid===uuid)
-      console.log('select', vs.selected)
       set(vs)
     },
   }

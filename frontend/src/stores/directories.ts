@@ -32,13 +32,13 @@ function createEntryStore(f: lib.DirectoryEntry): DirectoryEntryStore {
   }
 }
 
-interface DirectoryStoreData {
+export interface DirectoryStoreData {
   Entries: DirectoryEntryStore[]
   Tree: any
   RealDir: lib.Directory
 }
 
-interface DirectoryStore extends Writable<DirectoryStoreData> {
+export interface DirectoryStore extends Writable<DirectoryStoreData> {
   addEntry: (e: lib.DirectoryEntry) => void
   getByPath: (p: string) => DirectoryEntryStore
   removeByPath: (p: string) => void
@@ -79,12 +79,14 @@ function createDirectoryStore(d: lib.Directory): DirectoryStore {
   }
 }
 
-interface DirectoriesStoreData {
+export interface DirectoriesStoreData {
   Directories: DirectoryStore[]
+  Selected: DirectoryStore 
 }
 
-interface DirectoriesStore extends Writable<DirectoriesStoreData> {
+export interface DirectoriesStore extends Writable<DirectoriesStoreData> {
   clear: () => void
+  select: (uuid: string|number[]) => void
   addDirectory: (e: lib.Directory) => void
   getByUUID: (uuid: string|number[]) => DirectoryStore
   removeByUUID: (uuid: string|number[]) => void
@@ -93,6 +95,7 @@ interface DirectoriesStore extends Writable<DirectoriesStoreData> {
 export const directories: DirectoriesStore = ((): DirectoriesStore => {
   const dirstore: DirectoriesStoreData = {
     Directories: [],
+    Selected: null,
   }
   const { subscribe, set, update } = writable(dirstore)
 
@@ -103,7 +106,13 @@ export const directories: DirectoriesStore = ((): DirectoriesStore => {
     clear: () => {
       set({
         Directories: [],
+        Selected: null,
       })
+    },
+    select: (uuid: string|number[]) => {
+      let ds = get({subscribe})
+      ds.Selected = ds.Directories.find(v=>get(v).RealDir.UUID === uuid)
+      set(ds)
     },
     addDirectory: (e: lib.Directory) => {
       let ds = get({subscribe})
