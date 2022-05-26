@@ -113,7 +113,7 @@
   }
 </script>
 
-<main bind:this={mainElement} on:mousedown={viewMousedown}>
+<main on:mousedown={viewMousedown}>
   <nav>
     {#if !crumbs[0] || crumbs[0][0] !== ''}
       <li on:click={async ()=>await travel("/")}></li>
@@ -122,7 +122,7 @@
       <li class:focused={$view.wd===crumb[1]} on:click={async ()=>await travel("/"+crumb[1])} title={crumb[1]}>{crumb[0]}</li>
     {/each}
   </nav>
-  <section>
+  <section bind:this={mainElement}>
     {#if $view.wd != ""}
       <Folder title='..' on:click={async ()=>await travel("..")}/>
     {/if}
