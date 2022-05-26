@@ -87,6 +87,10 @@
             <label for='fileInfo__Permissions'>permissions</label>
             <input id='fileInfo__Permissions' type="text" disabled value={fileInfo.Permissions}>
           </li>
+          <li class='modification'>
+            <label for='fileInfo__ModificationTime'>modification</label>
+            <input id='fileInfo__ModificationTime' type="text" disabled value={new Intl.DateTimeFormat('en', {dateStyle: 'medium', timeStyle: 'medium'}).format(new Date(fileInfo.ModTime))}>
+          </li>
         </section>
       {:catch error}
         <span>ERROR: {error}</span>
