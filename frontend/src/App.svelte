@@ -17,6 +17,9 @@
   import FilePreview from './sections/FilePreview.svelte'
   import FileMetadata from './sections/FileMetadata.svelte'
   import { settings } from './stores/settings'
+  import { directories as directoriesStore } from './stores/directories'
+  import { views as viewsStore } from './stores/views'
+import DirectoryViewV from './sections/DirectoryViewV.svelte';
 
   let path: string
 
@@ -33,6 +36,8 @@
   let selectedView: string = ''
 
   $: title = project ? project.Title : ''
+
+  $: console.log($directoriesStore)
 
   onMount(async () => {
     try {
@@ -217,6 +222,8 @@
     
     // Set up runtime event receival.
     EventsOnMultiple('project-load', async (data: any) => {
+      directoriesStore.clear()
+      viewsStore.clear()
       directoryTrees = {}
       directories = []
       project = await GetProject()
@@ -230,6 +237,8 @@
       project = undefined
       directories = []
       directoryTrees = {}
+      directoriesStore.clear()
+      viewsStore.clear()
       await refresh()
     }, -1)
 
@@ -240,6 +249,8 @@
       console.log('directories', data)
     }, -1)
     EventsOnMultiple('directory', async (data: any) => {
+      directoriesStore.addDirectory(new lib.Directory(data))
+      // @@
       if (!directories.find(v=>v.UUID===data.UUID)) {
         directories = [...directories, new lib.Directory(data)]
         if (!directories[directories.length-1].Entries) {
@@ -250,6 +261,8 @@
       await refresh()
     }, -1)
     EventsOnMultiple('directory-add', async (data: any) => {
+      directoriesStore.addDirectory(new lib.Directory(data))
+      // @@
       if (!directories.find(v=>v.UUID===data.UUID)) {
         directories = [...directories, new lib.Directory(data)]
         if (!directories[directories.length-1].Entries) {
@@ -260,6 +273,8 @@
       await refresh()
     }, -1)
     EventsOnMultiple('directory-remove', async (data: any) => {
+      directoriesStore.removeByUUID(data.UUID)
+      // @@
       directories = directories.filter(v=>data.UUID!==v.UUID)
       delete directoryTrees[data.UUID]
       await refresh()
@@ -273,6 +288,11 @@
       await refresh()
     }, -1)
     EventsOnMultiple('directory-entry', (data: any) => {
+      let ds = directoriesStore.getByUUID(data.UUID)
+      if (ds) {
+        ds.addEntry(new lib.DirectoryEntry(data.Entry))
+      }
+      // @@
       let d = directories.find(v=>v.UUID===data.UUID)
       if (!d) return
       let e = new lib.DirectoryEntry(data.Entry)
@@ -302,6 +322,15 @@
       await refresh()*/
     }, -1)
     EventsOnMultiple('directory-entry-update', async (data: any) => {
+      let ds = directoriesStore.getByUUID(data.UUID)
+      if (ds) {
+        let e = ds.getByPath(data.Entry.Path)
+        if (e) {
+          e.set(new lib.DirectoryEntry(data.Entry))
+        }
+      }
+      // @@
+
       let d = directories.find(v=>v.UUID===data.UUID)
       if (!d) return
       let e = new lib.DirectoryEntry(data.Entry)
@@ -318,6 +347,11 @@
       await refresh()
     }, -1)
     EventsOnMultiple('directory-entry-remove', async (data: any) => {
+      let ds = directoriesStore.getByUUID(data.UUID)
+      if (ds) {
+        ds.removeByPath(data.Entry.Path)
+      }
+      // @@
       console.log('entry-remove', data)
       ftt.Remove(directoryTrees[data.UUID], data.Entry.Path)
       await refresh()
@@ -327,20 +361,29 @@
       await refresh()
     }, -1)
     EventsOnMultiple('directory-entry-found', async (data: any) => {
-      //console.log('entry-found', data)
+      console.log('entry-found', data)
       await refresh()
     }, -1)
     // View stuff
     EventsOnMultiple('view-directory-add', async (data: any) => {
+      viewsStore.add(new DirectoryView(data.View))
+      // @@
       if (directoryViews.find(v=>v.uuid === data.View.uuid)) {
         return
       }
       directoryViews = [...directoryViews, new DirectoryView(data.View)]
     }, -1)
     EventsOnMultiple('view-directory-remove', async (data: any) => {
+      viewsStore.remove(data.View.uuid)
+      // @@
       directoryViews = directoryViews.filter(v=>v.uuid!==data.View.uuid)
     }, -1)
     EventsOnMultiple('view-directory-navigate', async (data: any) => {
+      let vs = viewsStore.get(data.UUID)
+      if (vs) {
+        vs.setWorkingDir(data.Path)
+      }
+      // @@
       let d = directoryViews.find(v=>v.uuid === data.UUID)
       if (d) {
         d.wd = data.Path
@@ -360,6 +403,11 @@
       selectedView = data.UUID
     }, -1)
     EventsOnMultiple('view-select-files', async (data: any) => {
+      let vs = viewsStore.get(data.UUID)
+      if (vs) {
+        vs.selectFiles(data.Focused, data.Selected)
+      }
+      // @@
       let d = directoryViews.find(v=>v.uuid === data.UUID)
       if (d) {
         d.selected = data.Selected
