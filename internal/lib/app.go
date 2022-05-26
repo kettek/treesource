@@ -17,6 +17,7 @@ import (
 	"golang.org/x/image/draw"
 	"gopkg.in/yaml.v3"
 
+	"image/color"
 	"image/png"
 
 	// image decoders
@@ -258,6 +259,42 @@ func (a *App) QueryFile(root string, path string) (FileInfo, error) {
 	if err != nil {
 		return FileInfo{}, err
 	}
+
+	mimetype := mime.TypeByExtension(filepath.Ext(path))
+	var extra interface{}
+	if strings.HasPrefix(mimetype, "image") {
+		if f, err := os.OpenFile(p, os.O_RDONLY, 0); err == nil {
+			if img, _, err := image.DecodeConfig(f); err == nil {
+				i := ImageInfo{
+					Width:  img.Width,
+					Height: img.Height,
+				}
+
+				switch img.ColorModel {
+				case color.RGBAModel:
+					i.ColorModel = "RGBA"
+				case color.RGBA64Model:
+					i.ColorModel = "RGBA64"
+				case color.NRGBAModel:
+					i.ColorModel = "NRGBA"
+				case color.NRGBA64Model:
+					i.ColorModel = "NRGBA64"
+				case color.AlphaModel:
+					i.ColorModel = "Alpha"
+				case color.Alpha16Model:
+					i.ColorModel = "Alpha16"
+				case color.GrayModel:
+					i.ColorModel = "Gray"
+				case color.Gray16Model:
+					i.ColorModel = "Gray16"
+				default:
+					i.ColorModel = "Unknown"
+				}
+				extra = i
+			}
+		}
+	}
+
 	return FileInfo{
 		Name:        info.Name(),
 		Path:        p,
@@ -267,7 +304,8 @@ func (a *App) QueryFile(root string, path string) (FileInfo, error) {
 		Type:        info.Mode().Type().String(),
 		Special:     !info.Mode().Perm().IsRegular(),
 		ModTime:     info.ModTime(),
-		Mimetype:    mime.TypeByExtension(filepath.Ext(path)),
+		Mimetype:    mimetype,
+		Extra:       extra,
 	}, err
 }
 

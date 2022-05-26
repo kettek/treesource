@@ -2,6 +2,11 @@ package lib
 
 import "time"
 
+type ImageInfo struct {
+	Width, Height int
+	ColorModel    string
+}
+
 type FileInfo struct {
 	Name        string
 	Path        string
@@ -12,6 +17,7 @@ type FileInfo struct {
 	Special     bool
 	ModTime     time.Time
 	Mimetype    string
+	Extra       interface{}
 }
 
 type Thumbnail struct {

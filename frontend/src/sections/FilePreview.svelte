@@ -48,6 +48,7 @@
       {#await QueryFile($directory.RealDir.Path, $focusedEntry.Path)}
         <Throbber/>
       {:then fileInfo}
+        {console.log("eggs", fileInfo)}
         <section class='preview'>
           {#if fileInfo.Mimetype.startsWith('image')}
             {#await readFile(fileInfo.Path)}
@@ -83,6 +84,16 @@
             <label for='fileInfo__Type'>type</label>
             <input id='fileInfo__Type' type="text" disabled value={fileInfo.Mimetype}>
           </li>
+          {#if fileInfo.Mimetype.startsWith('image')}
+            <li class='dimensions'>
+              <label for='fileInfo__Dimensions'>dimensions</label>
+              <input id='fileInfo__Dimensions' type="text" disabled value={fileInfo.Extra.Width + 'x' + fileInfo.Extra.Height}>
+            </li>
+            <li class='colormodel'>
+              <label for='fileInfo__ColorModel'>color model</label>
+              <input id='fileInfo__ColorModel' type="text" disabled value={fileInfo.Extra.ColorModel}>
+            </li>
+          {/if}
           <li class='permissions'>
             <label for='fileInfo__Permissions'>permissions</label>
             <input id='fileInfo__Permissions' type="text" disabled value={fileInfo.Permissions}>
