@@ -119,7 +119,7 @@
 
 <main bind:this={mainElement} on:mousedown={viewMousedown}>
   <nav>
-    {#if crumbs[0][0] !== ''}
+    {#if !crumbs[0] || crumbs[0][0] !== ''}
       <li on:click={async ()=>await travel("/")}></li>
     {/if}
     {#each crumbs as crumb}
