@@ -1,5 +1,6 @@
 import { writable, get, Subscriber, Writable } from 'svelte/store'
 import type { lib } from '../../wailsjs/go/models'
+import * as ftt from '@kettek/filepaths-to-tree'
 
 interface DirectoryEntryStore extends Writable<lib.DirectoryEntry> {
   setRating: (v: number) => void
@@ -33,6 +34,7 @@ function createEntryStore(f: lib.DirectoryEntry): DirectoryEntryStore {
 
 interface DirectoryStoreData {
   Entries: DirectoryEntryStore[]
+  Tree: any
   RealDir: lib.Directory
 }
 
@@ -45,6 +47,7 @@ interface DirectoryStore extends Writable<DirectoryStoreData> {
 function createDirectoryStore(d: lib.Directory): DirectoryStore {
   const dir: DirectoryStoreData = {
     Entries: [],
+    Tree: {},
     RealDir: d,
   }
 
@@ -61,6 +64,7 @@ function createDirectoryStore(d: lib.Directory): DirectoryStore {
     removeByPath: (p: string) => {
       let dir = get({subscribe})
       dir.Entries = dir.Entries.filter(v=>get(v).Path!==p)
+      ftt.Remove(dir.Tree, p)
       set(dir)
     },
     addEntry: (e: lib.DirectoryEntry) => {
@@ -69,6 +73,7 @@ function createDirectoryStore(d: lib.Directory): DirectoryStore {
         return
       }
       dir.Entries.push(createEntryStore(e))
+      ftt.Insert(dir.Tree, e.Path, dir.Entries[dir.Entries.length-1])
       set(dir)
     },
   }

@@ -4,8 +4,9 @@ import type { lib } from '../../wailsjs/go/models'
 import type Views from 'src/sections/Views.svelte'
 
 interface DirectoryViewStore extends Writable<DirectoryView> {
-  setWorkingDir: (wd: string) => void
-  selectFiles: (focused: string, selected: string[]) => void
+  _setWorkingDir: (wd: string) => void
+  _selectFiles: (focused: string, selected: string[]) => void
+  select: (focused: string, selected: string[]) => void
 }
 
 function createDirectoryViewStore(v: DirectoryView): DirectoryViewStore {
@@ -15,57 +16,83 @@ function createDirectoryViewStore(v: DirectoryView): DirectoryViewStore {
     subscribe,
     set,
     update,
-    setWorkingDir: (wd: string) => {
+    _setWorkingDir: (wd: string) => {
       let v = get({subscribe})
       v.wd = wd
       set(v)
       console.log('set wd', wd)
     },
-    selectFiles: (focused: string, selected: string[]) => {
+    _selectFiles: (focused: string, selected: string[]) => {
       let v = get({subscribe})
       v.focused = focused
       v.selected = selected
       set(v)
       console.log('select', v)
     },
+    select: (focused: string, selected: string[]) => {
+      let v = get({subscribe})
+      actionPublisher.publish('view-select-files', {
+        uuid: v.uuid,
+        selected: selected,
+        focused: focused,
+      })
+    },
   }
 }
 
-interface ViewsStore extends Writable<DirectoryViewStore[]> {
+interface ViewStoreData {
+  views: DirectoryViewStore[]
+  selected: DirectoryViewStore
+}
+
+interface ViewsStore extends Writable<ViewStoreData> {
   clear: () => void
-  add: (DirectoryView) => void
+  add: (d: DirectoryView) => void
   remove: (uuid: number[]|string) => void
   get: (uuid: number[]|string) => DirectoryViewStore
+  select: (uuid: number[]|string) => void
 }
 
 export const views: ViewsStore = ((): ViewsStore => {
-  const views: DirectoryViewStore[] = []
+  const viewStoreData: ViewStoreData = {
+    views: [],
+    selected: null,
+  }
 
-  const { subscribe, set, update } = writable(views)
+  const { subscribe, set, update } = writable(viewStoreData)
 
   return {
     subscribe,
     set,
     update,
     clear: () => {
-      set([])
+      set({
+        views: [],
+        selected: null,
+      })
     },
     add: (d: DirectoryView) => {
       let vs = get({subscribe})
-      if (vs.find(v=>get(v).uuid===d.uuid)) return
-      vs.push(createDirectoryViewStore(d))
+      if (vs.views.find(v=>get(v).uuid===d.uuid)) return
+      vs.views.push(createDirectoryViewStore(d))
       set(vs)
       console.log('add dv', d)
     },
     remove: (uuid: number[]|string) => {
       let vs = get({subscribe})
-      vs = vs.filter(v=>get(v).uuid!==uuid)
+      vs.views = vs.views.filter(v=>get(v).uuid!==uuid)
       set(vs)
       console.log('remvoe dv')
     },
     get: (uuid: number[]|string) => {
       let vs = get({subscribe})
-      return vs.find(v=>get(v).uuid===uuid)
+      return vs.views.find(v=>get(v).uuid===uuid)
+    },
+    select: (uuid: number[]|string) => {
+      let vs = get({subscribe})
+      vs.selected = vs.views.find(v=>get(v).uuid===uuid)
+      console.log('select', vs.selected)
+      set(vs)
     },
   }
 })()

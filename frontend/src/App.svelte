@@ -381,7 +381,7 @@ import DirectoryViewV from './sections/DirectoryViewV.svelte';
     EventsOnMultiple('view-directory-navigate', async (data: any) => {
       let vs = viewsStore.get(data.UUID)
       if (vs) {
-        vs.setWorkingDir(data.Path)
+        vs._setWorkingDir(data.Path)
       }
       // @@
       let d = directoryViews.find(v=>v.uuid === data.UUID)
@@ -400,12 +400,14 @@ import DirectoryViewV from './sections/DirectoryViewV.svelte';
       tagsViews = tagsViews.filter(v=>v.uuid!==data.View.uuid)
     }, -1)
     EventsOnMultiple('view-select', async (data: any) => {
+      viewsStore.select(data.UUID)
+      // @@
       selectedView = data.UUID
     }, -1)
     EventsOnMultiple('view-select-files', async (data: any) => {
       let vs = viewsStore.get(data.UUID)
       if (vs) {
-        vs.selectFiles(data.Focused, data.Selected)
+        vs._selectFiles(data.Focused, data.Selected)
       }
       // @@
       let d = directoryViews.find(v=>v.uuid === data.UUID)
