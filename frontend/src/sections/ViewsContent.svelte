@@ -8,7 +8,7 @@
   import type { DirectoryViewStore } from '../stores/views'
   import { directories as directoriesStore } from '../stores/directories'
   import ViewFile from './views/ViewFile.svelte'
-  import FolderIcon from '../components/FolderIcon.svelte'
+  import Folder from '../components/Folder.svelte'
 
   export let view: DirectoryViewStore
 
@@ -124,28 +124,10 @@
   </nav>
   <section>
     {#if $view.wd != ""}
-      <li on:click={async ()=>await travel("..")}>
-        <div class="item folder">
-          <span class='icon'>
-            <FolderIcon/>
-          </span>
-          <span class='title'>
-            ..
-          </span>
-        </div>
-      </li>
+      <Folder title='..' on:click={async ()=>await travel("..")}/>
     {/if}
     {#each folders as [key, folder] (key)}
-      <li data-folder-id={key} on:click={async ()=>await travel(key)}>
-        <div class="item folder">
-          <span class='icon'>
-            <FolderIcon/>
-          </span>
-          <span class='title'>
-            {key}
-          </span>
-        </div>
-      </li>
+      <Folder title={key} on:click={async ()=>await travel(key)}/>
     {/each}
     {#each files as [key, file] (key)}
       <ViewFile key={key} file={file} directory={directory} view={view} />
@@ -207,42 +189,6 @@
     justify-content: flex-start;
     overflow-y: scroll;
     font-size: 80%;
-  }
-  li {
-    list-style: none;
-    border: 1px solid transparent;
-  }
-  li .title {
-    border: 1px solid transparent;
-  }
-  li.selected .title {
-    background: var(--primary-light);
-  }
-  li.focused .title {
-    border: 1px solid var(--secondary-light);
-  }
-  .item {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    width: 8em;
-    height: 12em;
-    overflow: hidden;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  .icon {
-    width: 80%;
-    height: 65%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .title {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    word-break: break-all;
   }
   .box {
     position: absolute;

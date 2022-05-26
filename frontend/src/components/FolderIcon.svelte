@@ -32,6 +32,5 @@
   img {
     max-width: 100%;
     max-height: 100%;
-    box-shadow: 1px 1px 3px var(--neutral-darker);
   }
 </style>
