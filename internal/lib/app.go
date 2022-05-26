@@ -292,17 +292,17 @@ func (a *App) PeekFile(path string, length int) ([]byte, error) {
 	return bytes, nil
 }
 
-func (a *App) GenerateIcon(paths []string, opts IconOptions) (Icon, error) {
+func (a *App) GenerateThumbnail(paths []string, opts ThumbnailOptions) (Thumbnail, error) {
 	path := filepath.Join(paths...)
 	f, err := os.OpenFile(path, os.O_RDONLY, 0)
 	if err != nil {
-		return Icon{}, err
+		return Thumbnail{}, err
 	}
 	defer f.Close()
 
 	img, format, err := image.Decode(f)
 	if err != nil {
-		return Icon{}, err
+		return Thumbnail{}, err
 	}
 
 	var w, h int
@@ -329,9 +329,9 @@ func (a *App) GenerateIcon(paths []string, opts IconOptions) (Icon, error) {
 	var b bytes.Buffer
 	o := bufio.NewWriter(&b)
 	if err := png.Encode(o, dst); err != nil {
-		return Icon{}, err
+		return Thumbnail{}, err
 	}
-	return Icon{
+	return Thumbnail{
 		Bytes:  b.Bytes(),
 		Format: format,
 	}, nil

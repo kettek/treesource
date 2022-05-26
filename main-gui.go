@@ -6,6 +6,7 @@ import (
 	"embed"
 	"fmt"
 	"treesource/internal/lib"
+	xdgicons "treesource/internal/xdg-icons"
 
 	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2"
@@ -48,6 +49,9 @@ func main() {
 		Bind: []interface{}{
 			app,
 			&Dialog{},
+			&xdgicons.Theme{
+				Root: "frontend/src/assets/breeze-icons/icons",
+			},
 		},
 		OnStartup: app.Startup,
 	})

@@ -1,32 +1,47 @@
 <script type='ts'>
   import { onMount } from 'svelte'
-  import type { lib } from '../../wailsjs/go/models'
+  import type { lib, xdgicons } from '../../wailsjs/go/models'
+  import { GetIcon } from '../../wailsjs/go/xdgicons/Theme';
 
-  import { getIcon } from '../models/icons'
+  import mime from 'mime'
+  import { getThumbnail } from '../models/thumbnails'
   import Throbber from './Throbber.svelte'
 
   export let paths: string[]
-  let icon: lib.Icon = null
+  let mimetype: string = ''
+  let icon: xdgicons.Icon = {}
+  let iconMimetype: string = ''
+  let thumbnail: lib.Thumbnail = null
   let error: Error
 
   onMount(async () => {
+    mimetype = mime.getType(paths[paths.length-1]) || 'application/octet-stream'
     try {
-      icon = await getIcon(paths, { MaxWidth: 256, MaxHeight: 256, Method: "ApproxBiLinear" })
+      icon = await GetIcon("mimetypes/"+mimetype.replace("/","-"), 64, 1)
+      iconMimetype = mime.getType(icon.Ext)
+    } catch(e) {
+      console.log('getIcon error', e)
+      // For now...
+      icon = await GetIcon("mimetypes/application-octet-stream", 64, 1)
+      iconMimetype = mime.getType(".svg")
+    }
+    try {
+      thumbnail = await getThumbnail(paths, { MaxWidth: 256, MaxHeight: 256, Method: "ApproxBiLinear" })
     } catch(e) {
       error = e
-      console.log(e)
+      console.log('getThumbnail error', e)
     }
   })
 </script>
 
-{#if icon}
-  {#if icon.Format}
-    <img src="data:{icon.Format};base64,{icon.Bytes}" alt="{icon.Format} icon">
+{#if thumbnail}
+  {#if thumbnail.Format}
+    <img src="data:{thumbnail.Format};base64,{thumbnail.Bytes}" alt="{thumbnail.Format} thumbnail">
   {:else}
-    <span>DUNNO</span>
+    <img src="data:{iconMimetype};base64,{icon.Bytes}" alt="{iconMimetype} thumbnail">
   {/if}
 {:else if error}
-  <span>FAIL</span>
+  <img src="data:{iconMimetype};base64,{icon.Bytes}" alt="{iconMimetype} thumbnail">
 {:else}
   <Throbber/>
 {/if}

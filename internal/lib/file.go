@@ -14,12 +14,12 @@ type FileInfo struct {
 	Mimetype    string
 }
 
-type Icon struct {
+type Thumbnail struct {
 	Format string `json:"Format"`
 	Bytes  []byte `json:"Bytes"`
 }
 
-type IconOptions struct {
+type ThumbnailOptions struct {
 	MaxWidth  int    `json:"MaxWidth"`
 	MaxHeight int    `json:"MaxHeight"`
 	Method    string `json:"Method"` // should be NearestNeighbor, CatmullRom, ApproxBiLinear
