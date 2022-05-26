@@ -14,8 +14,9 @@
   import * as ftt from '@kettek/filepaths-to-tree'
   import { DirectoryView, TagsView } from './models/views'
   import Views from './sections/Views.svelte'
-import FilePreview from './sections/FilePreview.svelte'
-import FileMetadata from './sections/FileMetadata.svelte'
+  import FilePreview from './sections/FilePreview.svelte'
+  import FileMetadata from './sections/FileMetadata.svelte'
+  import { settings } from './stores/settings'
 
   let path: string
 
@@ -33,7 +34,18 @@ import FileMetadata from './sections/FileMetadata.svelte'
 
   $: title = project ? project.Title : ''
 
-  onMount(() => {
+  onMount(async () => {
+    try {
+      await settings.load()
+    } catch(err: any) {
+      try {
+        await settings.save()
+      } catch(err: any) {
+        console.log('settings', err)
+      }
+    }
+    console.log('loaded settings', $settings)
+
     let subs = []
 
     subs.push(actionPublisher.subscribe('undo', async ({sourceTopic, message}) => {

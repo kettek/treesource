@@ -1,7 +1,7 @@
 <script lang="ts">
+  import { settings } from '../stores/settings'
 
   export let src: string = ''
-  export let autoplay: boolean = true
 
   let duration: number = 0
   let currentTime: number = 0
@@ -22,7 +22,7 @@
     <div class='rail'></div>
     <div class='train' style="left: calc({currentTime/duration*100}% - .5em)"><!-- choo choo --></div>
   </div>
-  <audio autoplay={autoplay} src={src} bind:duration bind:currentTime bind:muted bind:paused/>
+  <audio autoplay={$settings.autoplayAudio} src={src} bind:duration bind:currentTime bind:muted bind:paused/>
 </main>
 
 <style>

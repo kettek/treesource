@@ -75,7 +75,7 @@
             {#await readFile(fileInfo.Path)}
               <Throbber/>
             {:then data}
-              <AudioPlayer autoplay src="data:{fileInfo.Mimetype};base64,{data}"/>
+              <AudioPlayer src="data:{fileInfo.Mimetype};base64,{data}"/>
             {:catch err}
               <span>ERROR: {err}</span>
             {/await}

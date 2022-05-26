@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import type { lib, xdgicons } from '../../wailsjs/go/models'
   import { GetIcon } from '../../wailsjs/go/xdgicons/Theme';
+  import { settings } from '../stores/settings'
 
   import mime from 'mime'
   import { getThumbnail } from '../models/thumbnails'
@@ -26,7 +27,7 @@
       iconMimetype = mime.getType(".svg")
     }
     try {
-      thumbnail = await getThumbnail(paths, { MaxWidth: 256, MaxHeight: 256, Method: "ApproxBiLinear" })
+      thumbnail = await getThumbnail(paths, { MaxWidth: $settings.thumbnailWidth, MaxHeight: $settings.thumbnailHeight, Method: $settings.thumbnailMethod })
     } catch(e) {
       error = e
       console.log('getThumbnail error', e)
