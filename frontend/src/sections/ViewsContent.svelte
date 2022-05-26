@@ -16,7 +16,7 @@
   $: selectedFiles = $view.selected
   $: focusedFile = $view.focused
 
-  $: entries = Object.entries(Find($directory?.Tree||{}, $view.wd)) as [string, DirectoryEntryStore|any]
+  $: entries = Object.entries(Find($directory?.Tree||{}, $view.wd)||[]) as [string, DirectoryEntryStore|any]
   $: folders = entries.filter(v=>!v[1].update)
   $: files = entries.filter(v=>v[1].update)
 
