@@ -56,6 +56,7 @@ body {
     --neutral-s: 0%;
     --neutral-l: 27%;
     /**/
+    --lighter: 20%;
     --lighten: 25%;
     --darken: 15%;
     --darker: 20%;
@@ -63,6 +64,7 @@ body {
     --text: 90%;
     /**/
     --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
+    --primary-lighter: hsl(var(--primary-h), var(--primary-s), calc(var(--lighter) + var(--primary-l)));
     --primary-light: hsl(var(--primary-h), var(--primary-s), calc(var(--lighten) + var(--primary-l)));
     --primary-dark: hsl(var(--primary-h), var(--primary-s), calc(var(--primary-l) - var(--darken)));
     --primary-darker: hsl(var(--primary-h), var(--primary-s), calc(var(--primary-l) - var(--darker)));

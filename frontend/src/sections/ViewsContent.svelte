@@ -192,8 +192,9 @@
   }
   .box {
     position: absolute;
-    background: var(--primary-light);
-    opacity: 0.5;
+    background: var(--primary-lighter);
+    border: 1px solid var(--primary-light);
+    opacity: 0.35;
     pointer-events: none;
   }
 </style>
