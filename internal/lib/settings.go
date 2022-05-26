@@ -12,7 +12,7 @@ func (a *App) SaveSettings(s map[string]interface{}) error {
 	if err != nil {
 		return err
 	}
-	p = filepath.Join("settings.yml")
+	p = filepath.Join(p, "settings.yml")
 	b, err := yaml.Marshal(s)
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func (a *App) LoadSettings() (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	p = filepath.Join("settings.yml")
+	p = filepath.Join(p, "settings.yml")
 
 	b, err := os.ReadFile(p)
 	if err != nil {
