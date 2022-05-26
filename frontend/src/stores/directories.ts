@@ -2,9 +2,7 @@ import { writable, get, Subscriber, Writable } from 'svelte/store'
 import type { lib } from '../../wailsjs/go/models'
 import * as ftt from '@kettek/filepaths-to-tree'
 
-interface DirectoryEntryStore extends Writable<lib.DirectoryEntry> {
-  setRating: (v: number) => void
-  addTag: (v: string) => void
+export interface DirectoryEntryStore extends Writable<lib.DirectoryEntry> {
 }
 
 function createEntryStore(f: lib.DirectoryEntry): DirectoryEntryStore {
@@ -14,21 +12,6 @@ function createEntryStore(f: lib.DirectoryEntry): DirectoryEntryStore {
     subscribe,
     set,
     update,
-    setRating: (v: number) => {
-      // FIXME: this actually should publish entry-set-rating or call UpdateEntry...
-      set({
-        ...get({subscribe}),
-        Rating: v,
-      })
-    },
-    addTag: (v: string) => {
-      let o = get({subscribe})
-      if (o.Tags.find(v2=>v===v2)) return
-      set({
-        ...o,
-        Tags: [...o.Tags, v],
-      })
-    },
   }
 }
 
@@ -75,7 +58,7 @@ function createDirectoryStore(d: lib.Directory): DirectoryStore {
       dir.Entries.push(createEntryStore(e))
       ftt.Insert(dir.Tree, e.Path, dir.Entries[dir.Entries.length-1])
       set(dir)
-    },
+    }
   }
 }
 

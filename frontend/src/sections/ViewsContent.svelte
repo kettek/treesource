@@ -1,18 +1,38 @@
 <script lang='ts'>
-  import FileIcon from '../components/FileIcon.svelte'
-  import { lib } from '../../wailsjs/go/models'
   import { actionPublisher } from '../actions'
-  import { OpenFile } from '../../wailsjs/go/main/WApp.js'
 
-  import type { DirectoryView, TagsView } from '../models/views'
+  import { Find } from '@kettek/filepaths-to-tree'
 
-  export let view: DirectoryView
-  export let directory: lib.Directory
-  export let tree: Object
+  import type { DirectoryEntryStore } from '../stores/directories'
 
-  $: selectedFiles = view.selected
-  $: focusedFile = view.focused
+  import type { DirectoryViewStore } from '../stores/views'
+  import { directories as directoriesStore } from '../stores/directories'
+  import ViewFile from './views/ViewFile.svelte'
 
+  export let view: DirectoryViewStore
+
+  $: directory = directoriesStore.getByUUID($view.directory)
+
+  $: selectedFiles = $view.selected
+  $: focusedFile = $view.focused
+
+  $: entries = Object.entries(Find($directory?.Tree||{}, $view.wd)) as [string, DirectoryEntryStore|any]
+  $: folders = entries.filter(v=>!v[1].update)
+  $: files = entries.filter(v=>v[1].update)
+
+  // travel/locations
+  $: crumbs = $view?.wd.split($directory?.RealDir?.Separator).map((v, i, a) => {
+    return [v, a.slice(0, i+1).join($directory.RealDir.Separator)]
+  })
+
+  async function travel(to) {
+    actionPublisher.publish('view-directory-navigate', {
+      uuid: $view.uuid,
+      path: to,
+    })
+  }
+
+  // box/selection
   let showBox: boolean = false
   let box: [number, number, number, number] = [0,0,0,0]
   let mainElement: HTMLElement
@@ -22,22 +42,6 @@
     box[0]<box[2]?box[2]:box[0],
     box[1]<box[3]?box[3]:box[1],
   ]
-
-  $: entries = Object.entries(tree)
-  $: folders = entries.filter(v=>!(v[1] instanceof lib.DirectoryEntry))
-  $: files = entries.filter(v=>v[1] instanceof lib.DirectoryEntry)
-
-  $: crumbs = view.wd.split(directory.Separator).map((v, i, a) => {
-    return [v, a.slice(0, i+1).join(directory.Separator)]
-  })
-
-  async function travel(to) {
-    //let t = [view.wd, to].filter(v=>v!=='').join('/')
-    actionPublisher.publish('view-directory-navigate', {
-      uuid: view.uuid,
-      path: to,
-    })
-  }
 
   function viewMousedown(e: MouseEvent) {
     if (e.button !== 0) return
@@ -97,11 +101,7 @@
         }
       }
 
-      actionPublisher.publish('view-select-files', {
-        uuid: view.uuid,
-        selected: selectedFiles,
-        focused: focusedFile,
-      })
+      view.select(focusedFile, selectedFiles)
 
       showBox = false
       window.removeEventListener('mouseup', viewMouseup)
@@ -110,11 +110,6 @@
     window.addEventListener('mouseup', viewMouseup)
     window.addEventListener('mousemove', viewMousemove)
   }
-
-  function handleFileOpen(file: lib.DirectoryEntry) {
-
-  }
-
 </script>
 
 <main bind:this={mainElement} on:mousedown={viewMousedown}>
@@ -123,11 +118,11 @@
       <li on:click={async ()=>await travel("/")}></li>
     {/if}
     {#each crumbs as crumb}
-      <li class:focused={view.wd===crumb[1]} on:click={async ()=>await travel("/"+crumb[1])} title={crumb[1]}>{crumb[0]}</li>
+      <li class:focused={$view.wd===crumb[1]} on:click={async ()=>await travel("/"+crumb[1])} title={crumb[1]}>{crumb[0]}</li>
     {/each}
   </nav>
   <section>
-    {#if view.wd != ""}
+    {#if $view.wd != ""}
       <li on:click={async ()=>await travel("..")}>
         <div class="item folder">
           <span class='icon'>folder</span>
@@ -148,16 +143,7 @@
       </li>
     {/each}
     {#each files as [key, file] (key)}
-      <li data-file-id={file.Path} class:selected={selectedFiles.includes(file.Path)} class:focused={file.Path===focusedFile} on:dblclick={async ()=>await OpenFile([directory.Path, file.Path])}>
-        <div class="item file">
-          <span class='icon'>
-            <FileIcon paths={[directory.Path, file.Path]}/>
-          </span>
-          <span class='title'>
-            {key}
-          </span>
-        </div>
-      </li>
+      <ViewFile key={key} file={file} directory={directory} view={view} />
     {/each}
     {#if showBox}
       <div class='box' style="left: {boxRepresentation[0]}px; top: {boxRepresentation[1]}px; width: {boxRepresentation[2]-boxRepresentation[0]}px; height: {boxRepresentation[3]-boxRepresentation[1]}px"></div>

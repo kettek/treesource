@@ -1,9 +1,7 @@
 <script lang="ts">
-  import folderIcon from './assets/breeze-icons/icons/places/64/folder.svg'
-  import noneIcon from './assets/breeze-icons/icons/mimetypes/64/none.svg'
   import { HasProject, NewProject, GetProject, CloseProjectFile, LoadProjectFile, AddProjectDirectory, RemoveProjectDirectory, Ready, Undoable, Redoable, Undo, Redo, Unsaved, SaveProject, UpdateEntry } from '../wailsjs/go/main/WApp.js'
   import { AddDirectoryView, RemoveDirectoryView, AddTagsView, RemoveTagsView, SelectView, NavigateDirectoryView, SelectViewFiles } from '../wailsjs/go/main/WApp.js'
-  import { EventsOn, EventsOff, EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
+  import { EventsOnMultiple, Quit } from '../wailsjs/runtime/runtime'
   import { lib } from '../wailsjs/go/models'
   import * as Dialog from '../wailsjs/go/main/Dialog'
   import SplitPane from './components/SplitPane.svelte'
@@ -11,33 +9,18 @@
   import { onMount } from 'svelte'
   import Menu from './sections/Menu.svelte'
   import Directories from './sections/Directories.svelte'
-  import * as ftt from '@kettek/filepaths-to-tree'
-  import { DirectoryView, TagsView } from './models/views'
+  import { DirectoryView } from './models/views'
   import Views from './sections/Views.svelte'
   import FilePreview from './sections/FilePreview.svelte'
   import FileMetadata from './sections/FileMetadata.svelte'
   import { settings } from './stores/settings'
   import { directories as directoriesStore } from './stores/directories'
   import { views as viewsStore } from './stores/views'
-import DirectoryViewV from './sections/DirectoryViewV.svelte';
-
-  let path: string
 
   let project: lib.Project
   let undoable: boolean = false
   let redoable: boolean = false
   let unsaved: boolean = false
-
-  let directories: lib.Directory[] = []
-  let directoryTrees: any = {}
-
-  let directoryViews: DirectoryView[] = []
-  let tagsViews: TagsView[] = []
-  let selectedView: string = ''
-
-  $: title = project ? project.Title : ''
-
-  $: console.log($directoriesStore)
 
   onMount(async () => {
     try {
@@ -224,8 +207,6 @@ import DirectoryViewV from './sections/DirectoryViewV.svelte';
     EventsOnMultiple('project-load', async (data: any) => {
       directoriesStore.clear()
       viewsStore.clear()
-      directoryTrees = {}
-      directories = []
       project = await GetProject()
       console.log("project load", project.Directories)
       await refresh()
@@ -235,8 +216,6 @@ import DirectoryViewV from './sections/DirectoryViewV.svelte';
     EventsOnMultiple('project-unload', async (data: any) => {
       console.log("project unload", data)
       project = undefined
-      directories = []
-      directoryTrees = {}
       directoriesStore.clear()
       viewsStore.clear()
       await refresh()
@@ -250,33 +229,14 @@ import DirectoryViewV from './sections/DirectoryViewV.svelte';
     }, -1)
     EventsOnMultiple('directory', async (data: any) => {
       directoriesStore.addDirectory(new lib.Directory(data))
-      // @@
-      if (!directories.find(v=>v.UUID===data.UUID)) {
-        directories = [...directories, new lib.Directory(data)]
-        if (!directories[directories.length-1].Entries) {
-          directories[directories.length-1].Entries = []
-        }
-      }
-      if (!directoryTrees[data.UUID]) directoryTrees[data.UUID] = {}
       await refresh()
     }, -1)
     EventsOnMultiple('directory-add', async (data: any) => {
       directoriesStore.addDirectory(new lib.Directory(data))
-      // @@
-      if (!directories.find(v=>v.UUID===data.UUID)) {
-        directories = [...directories, new lib.Directory(data)]
-        if (!directories[directories.length-1].Entries) {
-          directories[directories.length-1].Entries = []
-        }
-      }
-      if (!directoryTrees[data.UUID]) directoryTrees[data.UUID] = {}
       await refresh()
     }, -1)
     EventsOnMultiple('directory-remove', async (data: any) => {
       directoriesStore.removeByUUID(data.UUID)
-      // @@
-      directories = directories.filter(v=>data.UUID!==v.UUID)
-      delete directoryTrees[data.UUID]
       await refresh()
     }, -1)
     EventsOnMultiple('directory-sync', async (data: any) => {
@@ -292,20 +252,6 @@ import DirectoryViewV from './sections/DirectoryViewV.svelte';
       if (ds) {
         ds.addEntry(new lib.DirectoryEntry(data.Entry))
       }
-      // @@
-      let d = directories.find(v=>v.UUID===data.UUID)
-      if (!d) return
-      let e = new lib.DirectoryEntry(data.Entry)
-      if (!e.Tags) {
-        e.Tags = []
-      }
-      if (e.Missing === undefined) {
-        e.Missing = false
-      }
-      d.Entries.push(e)
-      directories = [...directories]
-      ftt.Insert(directoryTrees[data.UUID], e.Path, e)
-      directoryTrees = {...directoryTrees}
     }, -1)
     EventsOnMultiple('directory-entry-add', async (data: any) => {
       /*let d = directories.find(v=>v.UUID===data.UUID)
@@ -329,21 +275,6 @@ import DirectoryViewV from './sections/DirectoryViewV.svelte';
           e.set(new lib.DirectoryEntry(data.Entry))
         }
       }
-      // @@
-
-      let d = directories.find(v=>v.UUID===data.UUID)
-      if (!d) return
-      let e = new lib.DirectoryEntry(data.Entry)
-      for (let i = 0; i < d.Entries.length; i++) {
-        if (d.Entries[i].Path === e.Path) {
-          d.Entries[i].Tags = e.Tags
-          d.Entries[i].Missing = e.Missing
-          d.Entries[i].Rating = e.Rating
-          break
-        }
-      }
-      directories = [...directories]
-      directoryTrees = {...directoryTrees}
       await refresh()
     }, -1)
     EventsOnMultiple('directory-entry-remove', async (data: any) => {
@@ -351,9 +282,6 @@ import DirectoryViewV from './sections/DirectoryViewV.svelte';
       if (ds) {
         ds.removeByPath(data.Entry.Path)
       }
-      // @@
-      console.log('entry-remove', data)
-      ftt.Remove(directoryTrees[data.UUID], data.Entry.Path)
       await refresh()
     }, -1)
     EventsOnMultiple('directory-entry-missing', async (data: any) => {
@@ -367,61 +295,29 @@ import DirectoryViewV from './sections/DirectoryViewV.svelte';
     // View stuff
     EventsOnMultiple('view-directory-add', async (data: any) => {
       viewsStore.add(new DirectoryView(data.View))
-      // @@
-      if (directoryViews.find(v=>v.uuid === data.View.uuid)) {
-        return
-      }
-      directoryViews = [...directoryViews, new DirectoryView(data.View)]
     }, -1)
     EventsOnMultiple('view-directory-remove', async (data: any) => {
       viewsStore.remove(data.View.uuid)
-      // @@
-      directoryViews = directoryViews.filter(v=>v.uuid!==data.View.uuid)
     }, -1)
     EventsOnMultiple('view-directory-navigate', async (data: any) => {
       let vs = viewsStore.get(data.UUID)
       if (vs) {
         vs._setWorkingDir(data.Path)
       }
-      // @@
-      let d = directoryViews.find(v=>v.uuid === data.UUID)
-      if (d) {
-        d.wd = data.Path
-        directoryViews = [...directoryViews]
-      }
     }, -1)
     EventsOnMultiple('view-tags-add', async (data: any) => {
-      if (tagsViews.find(v=>v.uuid === data.View.uuid)) {
-        return
-      }
-      tagsViews = [...tagsViews, new TagsView(data.View)]
+      // TODO
     }, -1)
     EventsOnMultiple('view-tags-remove', async (data: any) => {
-      tagsViews = tagsViews.filter(v=>v.uuid!==data.View.uuid)
+      // TODO
     }, -1)
     EventsOnMultiple('view-select', async (data: any) => {
       viewsStore.select(data.UUID)
-      // @@
-      selectedView = data.UUID
     }, -1)
     EventsOnMultiple('view-select-files', async (data: any) => {
       let vs = viewsStore.get(data.UUID)
       if (vs) {
         vs._selectFiles(data.Focused, data.Selected)
-      }
-      // @@
-      let d = directoryViews.find(v=>v.uuid === data.UUID)
-      if (d) {
-        d.selected = data.Selected
-        d.focused = data.Focused
-        directoryViews = [...directoryViews]
-        return
-      }
-      let t = tagsViews.find(v=>v.uuid === data.UUID)
-      if (t) {
-        t.selected = data.Selected
-        d.focused = data.Focused
-        tagsViews = [...tagsViews]
       }
     }, -1)
 
@@ -438,11 +334,11 @@ import DirectoryViewV from './sections/DirectoryViewV.svelte';
     <Menu project={project} unsaved={unsaved} undoable={undoable} redoable={redoable}></Menu>
   </section>
   <section class='view'>
-    <SplitPane type="horizontal" pos=80>
+    <SplitPane type="horizontal" pos={80}>
       <section slot=a>
-        <SplitPane type="horizontal" pos=20>
+        <SplitPane type="horizontal" pos={20}>
           <section slot=a class='view__dirs'>
-            <SplitPane type="vertical" pos=50>
+            <SplitPane type="vertical" pos={50}>
               <Directories slot=a disabled={!project}></Directories>
               <div slot=b class='view__dirs__tags'>
                 tags
@@ -450,15 +346,15 @@ import DirectoryViewV from './sections/DirectoryViewV.svelte';
             </SplitPane>
           </section>
           <section slot=b class='view__view'>
-            <Views selectedView={selectedView} tagsViews={tagsViews} directoryViews={directoryViews} directories={directories} directoryTrees={directoryTrees}></Views>
+            <Views></Views>
             <div class='view__view__controls'>controls</div>
           </section>
         </SplitPane>
       </section>
       <section slot=b class='view__info'>
         <SplitPane type='vertical' pos={40}>
-          <FilePreview slot=a selectedView={selectedView} directories={directories} directoryViews={directoryViews} tagsViews={tagsViews}></FilePreview>
-          <FileMetadata slot=b selectedView={selectedView} directories={directories} directoryViews={directoryViews} tagsViews={tagsViews}></FileMetadata>
+          <FilePreview view={$viewsStore.selected} slot=a></FilePreview>
+          <FileMetadata slot=b view={$viewsStore.selected}></FileMetadata>
         </SplitPane>
       </section>
     </SplitPane>

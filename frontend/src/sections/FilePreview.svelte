@@ -1,31 +1,28 @@
 <script lang='ts'>
-  import SplitPane from '../components/SplitPane.svelte'
-
-  import { onMount } from 'svelte'
+  // Imports
+  import { get } from 'svelte/store'
   import { PeekFile, QueryFile, ReadFile } from '../../wailsjs/go/main/WApp'
 
-  import { lib } from '../../wailsjs/go/models'
-  import type { DirectoryView, TagsView } from '../models/views'
+  // Components
   import Throbber from '../components/Throbber.svelte'
   import AudioPlayer from '../components/AudioPlayer.svelte'
 
-  export let directories: lib.Directory[] = []
+  // Stores
+  import type { DirectoryViewStore } from '../stores/views'
+  import { directories as directoriesStore } from '../stores/directories'
 
-  export let tagsViews: TagsView[]
-  export let directoryViews: DirectoryView[]
+  // Properties
+  export let view: DirectoryViewStore
 
-  export let selectedView: string | number[]  = ''
-
+  // Vars
   let fileCache: {[key: string]: string} = {}
   let peekCache: {[key: string]: string} = {}
 
-  $: directoryView = directoryViews.find(v=>v.uuid===selectedView)
-  $: directory = directoryView ? directories.find(v => v.UUID === directoryView.directory) : undefined
+  // Reactive Vars
+  $: directory = directoriesStore.getByUUID($view?.directory)
+  $: focusedEntry = $directory?.Entries.find(v=>get(v).Path===$view.focused)
 
-  let fileInfo: any
-
-  $: focusedEntry = directory?.Entries.find(v=>v.Path===directoryView?.focused)
-
+  // Functions
   async function readFile(name: string): Promise<string> {
     if (fileCache[name]) {
       return fileCache[name]
@@ -43,15 +40,12 @@
     peekCache[name] = atob(bytes)
     return peekCache[name]
   }
-
-  onMount(() => {
-  })
 </script>
 
 <main>
   {#if focusedEntry}
     <section class='preview__information'>
-      {#await QueryFile(directory.Path, focusedEntry.Path)}
+      {#await QueryFile($directory.RealDir.Path, $focusedEntry.Path)}
         <Throbber/>
       {:then fileInfo}
         <section class='preview'>

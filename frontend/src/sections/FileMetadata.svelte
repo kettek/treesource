@@ -1,33 +1,34 @@
 <script lang='ts'>
+  // Imports
+  import { get } from 'svelte/store'
   import { actionPublisher } from '../actions'
 
-  import type { lib } from '../../wailsjs/go/models'
-  import type { DirectoryView, TagsView } from '../models/views'
+  // Types
+  import type { DirectoryViewStore } from '../stores/views'
 
-  export let directories: lib.Directory[] = []
+  // Stores
+  import { directories as directoriesStore } from '../stores/directories'
 
-  export let tagsViews: TagsView[]
-  export let directoryViews: DirectoryView[]
+  // Properties
+  export let view: DirectoryViewStore
 
-  export let selectedView: string | number[]  = ''
+  // Reactive Vars
+  $: directory = directoriesStore.getByUUID($view?.directory)
+  $: focusedEntry = $directory?.Entries.find(v=>get(v).Path===$view.focused)
 
-  $: directoryView = directoryViews.find(v=>v.uuid===selectedView)
-  $: directory = directoryView ? directories.find(v => v.UUID === directoryView.directory) : undefined
-
-  $: focusedEntry = directory?.Entries.find(v=>v.Path===directoryView?.focused)
-
+  // Functions
   function removeTag(tag: string) {
     actionPublisher.publish('entry-remove-tag', {
-      uuid: selectedView,
+      uuid: $view.uuid,
       tag: tag,
     })
   }
 
   function setRating(value: number) {
     actionPublisher.publish('entry-set-rating', {
-      uuid: directory?.UUID,
-      path: focusedEntry.Path,
-      entry: {...focusedEntry, Rating: value},
+      uuid: $directory.RealDir.UUID,
+      path: $focusedEntry.Path,
+      entry: {...$focusedEntry, Rating: value},
     })
   }
 </script>
@@ -38,8 +39,8 @@
       <header>rating</header>
       <article class='rating'>
         {#each [1, 2, 3, 4, 5] as rating}
-          <span class='rating__star' class:selected={rating<=focusedEntry.Rating} on:click={_=>setRating(rating)}>
-            {rating<=focusedEntry.Rating?'✦':'✧'}
+          <span class='rating__star' class:selected={rating<=$focusedEntry.Rating} on:click={_=>setRating(rating)}>
+            {rating<=$focusedEntry.Rating?'✦':'✧'}
           </span>
         {/each}
       </article>
@@ -47,8 +48,8 @@
     <section>
       <header>tags</header>
       <article class='tags'>
-        {#if focusedEntry.Tags}
-          {#each focusedEntry.Tags as tag}
+        {#if $focusedEntry.Tags}
+          {#each $focusedEntry.Tags as tag}
             <div class='tag'>
               <div class='tag__name'>
                 {tag}

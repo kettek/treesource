@@ -4,7 +4,7 @@ import type { lib } from '../../wailsjs/go/models'
 import type Views from 'src/sections/Views.svelte'
 import { actionPublisher } from '../actions'
 
-interface DirectoryViewStore extends Writable<DirectoryView> {
+export interface DirectoryViewStore extends Writable<DirectoryView> {
   _setWorkingDir: (wd: string) => void
   _selectFiles: (focused: string, selected: string[]) => void
   select: (focused: string, selected: string[]) => void
@@ -19,11 +19,13 @@ function createDirectoryViewStore(v: DirectoryView): DirectoryViewStore {
     update,
     _setWorkingDir: (wd: string) => {
       let v = get({subscribe})
+      if (v.wd === wd) return
       v.wd = wd
       set(v)
     },
     _selectFiles: (focused: string, selected: string[]) => {
       let v = get({subscribe})
+      if (v.focused === focused && v.selected.length === selected.length && v.selected.every((v,i) => v===selected[i])) return
       v.focused = focused
       v.selected = selected
       set(v)
