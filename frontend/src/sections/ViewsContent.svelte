@@ -8,6 +8,7 @@
   import type { DirectoryViewStore } from '../stores/views'
   import { directories as directoriesStore } from '../stores/directories'
   import ViewFile from './views/ViewFile.svelte'
+  import FolderIcon from '../components/FolderIcon.svelte'
 
   export let view: DirectoryViewStore
 
@@ -125,7 +126,9 @@
     {#if $view.wd != ""}
       <li on:click={async ()=>await travel("..")}>
         <div class="item folder">
-          <span class='icon'>folder</span>
+          <span class='icon'>
+            <FolderIcon/>
+          </span>
           <span class='title'>
             ..
           </span>
@@ -135,7 +138,9 @@
     {#each folders as [key, folder] (key)}
       <li data-folder-id={key} on:click={async ()=>await travel(key)}>
         <div class="item folder">
-          <span>folder</span>
+          <span class='icon'>
+            <FolderIcon/>
+          </span>
           <span class='title'>
             {key}
           </span>
@@ -226,11 +231,6 @@
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
-  }
-  .item.folder {
-    background: green;
-  }
-  .item.file {
   }
   .icon {
     width: 80%;
