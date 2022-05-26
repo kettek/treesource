@@ -25,15 +25,10 @@
   li {
     list-style: none;
     border: 1px solid transparent;
+    margin: .1em;
   }
-  li .title {
-    border: 1px solid transparent;
-  }
-  li.selected .title {
+  li.selected {
     background: var(--primary-light);
-  }
-  li.focused .title {
-    border: 1px solid var(--secondary-light);
   }
   .item {
     display: inline-flex;
@@ -50,7 +45,7 @@
     width: 80%;
     height: 65%;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
   }
   .title {
