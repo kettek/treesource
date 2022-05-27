@@ -149,7 +149,7 @@
     grid-template-columns: 6.5em minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
     font-size: 10pt;
-    padding: .5em 0;
+    padding: .15em 0;
   }
   li.path {
     grid-template-columns: minmax(0, 1fr);
